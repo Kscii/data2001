@@ -2,13 +2,13 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.task1_statistics import (
+from data2001_assignment.task1.statistics import (
     dabi0142_statistics,
     jzho0172_statistics,
     xfan0282_statistics,
     xuyu8020_statistics,
 )
-from src.task1_statistics.statistic_result import StatisticResult
+from data2001_assignment.task1.statistics.statistic_result import StatisticResult
 
 EXPECTED_COLUMNS = [
     "member", # 你的unikey
