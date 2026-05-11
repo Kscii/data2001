@@ -6,13 +6,16 @@ from src.task1_cleaning.clean_column_names import clean_column_names
 from src.task1_cleaning.clean_missing_values import clean_missing_values
 from src.task1_cleaning.convert_numeric_columns import convert_numeric_columns
 from src.task1_cleaning.extract_unit_column import extract_unit_column
+from src.task1_cleaning.reshape_wide_to_long import reshape_wide_to_long
 from src.task1_cleaning.validate_and_flag_outliers import validate_and_flag_outliers
+
 
 CLEANING_STEPS = [
     clean_column_names,
     extract_unit_column, # xfan0282
     clean_missing_values,
     convert_numeric_columns,
+    reshape_wide_to_long
     validate_and_flag_outliers,
 ]
 
