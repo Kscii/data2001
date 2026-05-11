@@ -1,5 +1,5 @@
 import pandas as pd
-from src.task1_statistics.statistic_result import StatisticResult
+from data2001_assignment.task1.statistics.statistic_result import StatisticResult
 
 # 返回接口使用StatisticResult中定义的dataclass的格式
 # 函数推荐命名为unikey-{统计函数编号}，如: xfan0282-1

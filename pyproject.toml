@@ -7,7 +7,22 @@ requires-python = ">=3.12"
 dependencies = [
     "numpy>=2.4.4",
     "pandas>=3.0.2",
+    "psycopg[binary]>=3.3.4",
+    "pyyaml>=6.0.3",
+    "requests>=2.33.1",
+    "scipy>=1.17.1",
+    "sqlalchemy>=2.0.49",
 ]
+
+[project.scripts]
+data2001 = "data2001_assignment.cli:main"
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [dependency-groups]
 dev = [

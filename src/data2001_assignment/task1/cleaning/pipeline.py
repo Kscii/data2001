@@ -2,12 +2,14 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.task1_cleaning.clean_column_names import clean_column_names
-from src.task1_cleaning.clean_missing_values import clean_missing_values
-from src.task1_cleaning.convert_numeric_columns import convert_numeric_columns
-from src.task1_cleaning.extract_unit_column import extract_unit_column
-from src.task1_cleaning.reshape_wide_to_long import reshape_wide_to_long
-from src.task1_cleaning.validate_and_flag_outliers import validate_and_flag_outliers
+from data2001_assignment.task1.cleaning.clean_column_names import clean_column_names
+from data2001_assignment.task1.cleaning.clean_missing_values import clean_missing_values
+from data2001_assignment.task1.cleaning.convert_numeric_columns import convert_numeric_columns
+from data2001_assignment.task1.cleaning.extract_unit_column import extract_unit_column
+from data2001_assignment.task1.cleaning.reshape_wide_to_long import reshape_wide_to_long
+from data2001_assignment.task1.cleaning.validate_and_flag_outliers import (
+    validate_and_flag_outliers,
+)
 
 
 CLEANING_STEPS = [
@@ -15,7 +17,7 @@ CLEANING_STEPS = [
     extract_unit_column, # xfan0282
     clean_missing_values,
     convert_numeric_columns,
-    reshape_wide_to_long
+    reshape_wide_to_long,
     validate_and_flag_outliers,
 ]
 
