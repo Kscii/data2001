@@ -5,6 +5,7 @@ __pycache__/
 data/processed/*
 data/statistics/*
 data/raw/poi_api/*
+configs/local.yaml
 
 .env
 *.env
