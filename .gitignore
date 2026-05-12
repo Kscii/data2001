@@ -1,5 +1,11 @@
 __pycache__/
 .venv/
+*.egg-info/
 
 data/processed/*
 data/statistics/*
+data/raw/poi_api/*
+
+.env
+*.env
+!*.env.example
