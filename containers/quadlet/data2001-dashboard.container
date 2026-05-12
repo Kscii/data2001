@@ -1,0 +1,17 @@
+[Unit]
+Description=DATA2001 read-only Dash dashboard
+After=data2001-postgis.service
+Requires=data2001-postgis.service
+
+[Container]
+Image=ghcr.io/OWNER/REPO/data2001-app:latest
+ContainerName=data2001-dashboard
+Network=data2001.network
+PublishPort=127.0.0.1:8050:8050
+EnvironmentFile=%h/.config/data2001/app.env
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target

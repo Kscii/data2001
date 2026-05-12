@@ -1,0 +1,44 @@
+services:
+  postgis:
+    image: docker.io/postgis/postgis:16-3.4
+    container_name: data2001-postgis
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: data2001
+      POSTGRES_USER: data2001
+      POSTGRES_PASSWORD: data2001
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - data2001-postgis-compose-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U data2001 -d data2001"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  dashboard:
+    profiles:
+      - dashboard
+    build:
+      context: .
+      dockerfile: Containerfile.app
+    container_name: data2001-dashboard
+    restart: unless-stopped
+    depends_on:
+      postgis:
+        condition: service_healthy
+    environment:
+      DATA2001_CONFIG: /app/configs/local.yaml
+      DATA2001_DATABASE_HOST: postgis
+      DATA2001_DATABASE_PORT: 5432
+      DATA2001_DATABASE_NAME: data2001
+      DATA2001_DATABASE_USER: data2001
+      DATA2001_DATABASE_PASSWORD: data2001
+      DATA2001_DATABASE_SCHEMA: data2001
+    ports:
+      - "127.0.0.1:8050:8050"
+
+volumes:
+  data2001-postgis-compose-data:
