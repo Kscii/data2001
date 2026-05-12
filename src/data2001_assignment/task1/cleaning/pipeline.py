@@ -57,6 +57,6 @@ def run_task1_cleaning(input_csv_path: str, output_csv_path: str | None = None) 
 
 
 if __name__ == "__main__":
-    input_csv_path = "data/raw/raw_data.csv"
+    input_csv_path = "data/raw/task1/raw_data.csv"
     output_csv_path = "data/processed/cleaned_data.csv"
     cleaned_df = run_task1_cleaning(input_csv_path, output_csv_path)
