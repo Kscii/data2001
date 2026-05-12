@@ -1,0 +1,259 @@
+# 需要改名为 local.yaml 才可以覆盖默认配置
+database:
+  driver: postgresql+psycopg
+  host: localhost
+  port: 5432
+  database: data2001
+  user: data2001
+  password: data2001
+  schema: data2001
+
+task2:
+  crawl_scope: greater_sydney
+  gccsa_name: Greater Sydney
+  selected_sa4_by_member: {}
+  sa4_codes: []
+  clean_batch_size: 1000
+
+pipeline:
+  # 所有可加入 pipeline 的步骤（默认顺序）.
+  steps_available:
+    - init_db
+    - check_db
+    - plan_crawl
+    - load_boundaries
+    - fetch_poi
+    - load_income
+    - compute_score
+    - generate_figures
+    - clear_db
+    - reset_db
+
+  # 本次执行启用步骤；顺序按这里定义.
+  # 跳过某一步可以删掉该行, 或临时注释该行.
+  steps_enabled:
+    - plan_crawl
+    - load_boundaries
+    - fetch_poi
+    - load_income
+    - compute_score
+
+api:
+  page_size: 1000
+  timeout_seconds: 30
+  max_retries: 3
+  sleep_seconds: 0.2
+  out_sr: 4326
+  layers:
+    poi:
+      url: "https://maps.six.nsw.gov.au/arcgis/rest/services/public/NSW_POI/MapServer/0/query"
+      geometry_type: esriGeometryPoint
+      expected_srid: 4283
+      expected_fields:
+        - objectid
+        - topoid
+        - poigroup
+        - poitype
+        - poiname
+        - poilabel
+        - poilabeltype
+        - poialtlabel
+        - poisourcefeatureoid
+        - accesscontrol
+        - startdate
+        - enddate
+        - lastupdate
+        - msoid
+        - centroidid
+        - shapeuuid
+        - changetype
+        - processstate
+        - urbanity
+      out_fields:
+        - objectid
+        - topoid
+        - poigroup
+        - poitype
+        - poiname
+        - poilabel
+        - poilabeltype
+        - poialtlabel
+        - poisourcefeatureoid
+        - accesscontrol
+        - startdate
+        - enddate
+        - lastupdate
+        - msoid
+        - centroidid
+        - shapeuuid
+        - changetype
+        - processstate
+        - urbanity
+    sa2:
+      url: "https://geo.abs.gov.au/arcgis/rest/services/ASGS2021/SA2/FeatureServer/0/query"
+      geometry_type: esriGeometryPolygon
+      expected_srid: 3857
+      expected_fields:
+        - sa2_code_2021
+        - sa2_name_2021
+        - sa3_code_2021
+        - sa3_name_2021
+        - sa4_code_2021
+        - sa4_name_2021
+        - gccsa_code_2021
+        - gccsa_name_2021
+        - state_code_2021
+        - state_name_2021
+        - area_albers_sqkm
+        - asgs_loci_uri_2021
+      out_fields:
+        - sa2_code_2021
+        - sa2_name_2021
+        - sa3_code_2021
+        - sa3_name_2021
+        - sa4_code_2021
+        - sa4_name_2021
+        - gccsa_code_2021
+        - gccsa_name_2021
+        - state_code_2021
+        - state_name_2021
+        - area_albers_sqkm
+        - asgs_loci_uri_2021
+    sa4:
+      url: "https://geo.abs.gov.au/arcgis/rest/services/ASGS2021/SA4/MapServer/0/query"
+      geometry_type: esriGeometryPolygon
+      expected_srid: 3857
+      expected_fields:
+        - sa4_code_2021
+        - sa4_name_2021
+        - gccsa_code_2021
+        - gccsa_name_2021
+        - state_code_2021
+        - state_name_2021
+        - area_albers_sqkm
+        - asgs_loci_uri_2021
+      out_fields:
+        - sa4_code_2021
+        - sa4_name_2021
+        - gccsa_code_2021
+        - gccsa_name_2021
+        - state_code_2021
+        - state_name_2021
+        - area_albers_sqkm
+        - asgs_loci_uri_2021
+    population:
+      url: "https://geo.abs.gov.au/arcgis/rest/services/Hosted/ABS_Population_and_people_by_2021_SA2_Nov_2023/FeatureServer/1/query"
+      geometry_type: esriGeometryPolygon
+      expected_srid: 4283
+      expected_fields:
+        - sa2_code_2021
+        - sa2_name_2021
+        - erp_p_202022
+        - erp_212022
+        - area_albers_sqkm
+      out_fields:
+        - sa2_code_2021
+        - sa2_name_2021
+        - erp_p_202022
+        - erp_212022
+        - area_albers_sqkm
+    income:
+      url: "https://geo.abs.gov.au/arcgis/rest/services/Hosted/Personal_Income_in_Australia_2022_23_SA2_2021/FeatureServer/0/query"
+      geometry_type: esriGeometryPolygon
+      expected_srid: 7844
+      expected_fields:
+        - sa2_code_2021
+        - sa2_name_2021
+        - income_earners_23
+        - income_earners_22
+        - change_from_prev_year_23_22
+        - change_from_prev_year_pct_23_22
+        - median_income_23
+      out_fields:
+        - sa2_code_2021
+        - sa2_name_2021
+        - income_earners_23
+        - income_earners_22
+        - change_from_prev_year_23_22
+        - change_from_prev_year_pct_23_22
+        - median_income_23
+
+poi:
+  group_names:
+    1: Community
+    2: Education
+    3: Recreation
+    4: Transport
+    5: Utility
+    6: Hydrography
+    7: Landform
+    8: Place
+    9: Industry
+
+spatial:
+  assignment_method: covers_deterministic_first
+  database_srid: 4326
+
+maintenance:
+  require_yes: true
+
+scoring:
+  score_universe: greater_sydney
+  min_population: 100
+  output_scale: 100
+  score_version: baseline
+
+population:
+  sa2_code_field: sa2_code_2021
+  population_field: erp_p_202022
+  population_density_field: erp_212022
+
+income:
+  enabled: true
+  sa2_code_field: sa2_code_2021
+  sa2_name_field: sa2_name_2021
+  income_earners_current_field: income_earners_23
+  income_earners_previous_field: income_earners_22
+  income_earners_change_field: change_from_prev_year_23_22
+  income_earners_change_pct_field: change_from_prev_year_pct_23_22
+  median_income_field: median_income_23
+  min_income_earners: 1000
+  source_year: "2022-23"
+  source_name: ABS Personal Income in Australia
+
+correlation:
+  enabled: true
+  method: pearson
+  robustness_method: spearman
+  alpha: 0.05
+
+outputs:
+  figures_dir: report/figures
+  raw_poi_response_dir: data/raw/poi_api/responses
+  raw_poi_features_jsonl: data/raw/poi_api/features.jsonl
+  raw_task1_csv: data/raw/task1/raw_data.csv
+  processed_task1_cleaned_csv: data/processed/cleaned_data.csv
+
+figures:
+  format: png
+  width: 1200
+  height: 800
+  scale: 2
+  map_engine: plotly
+  top_n: 10
+  score_histogram_nbins: 20
+
+progress:
+  enabled: true
+  bbox_log_interval: 10
+
+dashboard:
+  enabled: true
+  host: 0.0.0.0
+  port: 8050
+  debug: false
+  title: DATA2001 Dashboard
+  poi_limit:
+  default_top_n: 30
+  table_max_rows: 500
+  table_page_size: 12
