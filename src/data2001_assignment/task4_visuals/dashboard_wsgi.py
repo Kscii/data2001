@@ -5,7 +5,7 @@ import os
 
 from data2001_assignment.config import load_settings
 from data2001_assignment.db.engine import create_engine_from_settings
-from data2001_assignment.visualisation.dashboard import create_dashboard_app
+from data2001_assignment.task4_visuals.dashboard import create_dashboard_app
 
 
 config_path = os.getenv("DATA2001_CONFIG", "configs/local.yaml")

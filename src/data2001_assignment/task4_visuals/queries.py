@@ -1,17 +1,24 @@
-"""可视化查询层, 向 notebook、report 和 Dash 返回 DataFrame."""
+"""可视化查询层, 向 notebook、report 和 Dash 返回显式展示记录."""
 from __future__ import annotations
 
-import pandas as pd
 from sqlalchemy import Engine, text
 
+from data2001_assignment.task4_visuals.records import (
+    CorrelationResultView,
+    PoiGroupCountView,
+    PoiPointView,
+    Sa2ScoreView,
+    ScoreIncomeView,
+)
 
-def load_sa2_scores(
+
+def select_sa2_scores(
     engine: Engine,
     schema: str,
     *,
     score_version: str,
     score_universe: str,
-) -> pd.DataFrame:
+) -> list[Sa2ScoreView]:
     """读取带 SA2 geometry 的 score 数据, 用于图表和地图."""
     sql = text(
         f"""
@@ -37,15 +44,14 @@ def load_sa2_scores(
         """
     )
     with engine.connect() as connection:
-        return pd.DataFrame(
-            connection.execute(
-                sql,
-                {"score_version": score_version, "score_universe": score_universe},
-            ).mappings().all()
-        )
+        rows = connection.execute(
+            sql,
+            {"score_version": score_version, "score_universe": score_universe},
+        ).mappings().all()
+    return [Sa2ScoreView.from_row(dict(row)) for row in rows]
 
 
-def load_poi_group_counts(engine: Engine, schema: str) -> pd.DataFrame:
+def select_poi_group_counts(engine: Engine, schema: str) -> list[PoiGroupCountView]:
     """按 POI group 聚合 POI 数量."""
     sql = text(
         f"""
@@ -59,10 +65,11 @@ def load_poi_group_counts(engine: Engine, schema: str) -> pd.DataFrame:
         """
     )
     with engine.connect() as connection:
-        return pd.DataFrame(connection.execute(sql).mappings().all())
+        rows = connection.execute(sql).mappings().all()
+    return [PoiGroupCountView.from_row(dict(row)) for row in rows]
 
 
-def load_poi_points(engine: Engine, schema: str, *, limit: int | None = None) -> pd.DataFrame:
+def select_poi_points(engine: Engine, schema: str, *, limit: int | None = None) -> list[PoiPointView]:
     """读取 POI 点位及其 SA2/SA4 归属信息."""
     limit_clause = "LIMIT :limit" if limit is not None else ""
     sql = text(
@@ -92,10 +99,17 @@ def load_poi_points(engine: Engine, schema: str, *, limit: int | None = None) ->
     )
     with engine.connect() as connection:
         params = {"limit": limit} if limit is not None else {}
-        return pd.DataFrame(connection.execute(sql, params).mappings().all())
+        rows = connection.execute(sql, params).mappings().all()
+    return [PoiPointView.from_row(dict(row)) for row in rows]
 
 
-def load_score_income(engine: Engine, schema: str, *, score_version: str, score_universe: str) -> pd.DataFrame:
+def select_score_income(
+    engine: Engine,
+    schema: str,
+    *,
+    score_version: str,
+    score_universe: str,
+) -> list[ScoreIncomeView]:
     """读取 score 与 median income 已 join 的数据."""
     sql = text(
         f"""
@@ -119,15 +133,20 @@ def load_score_income(engine: Engine, schema: str, *, score_version: str, score_
         """
     )
     with engine.connect() as connection:
-        return pd.DataFrame(
-            connection.execute(
-                sql,
-                {"score_version": score_version, "score_universe": score_universe},
-            ).mappings().all()
-        )
+        rows = connection.execute(
+            sql,
+            {"score_version": score_version, "score_universe": score_universe},
+        ).mappings().all()
+    return [ScoreIncomeView.from_row(dict(row)) for row in rows]
 
 
-def load_correlation_results(engine: Engine, schema: str, *, score_version: str, score_universe: str) -> pd.DataFrame:
+def select_correlation_results(
+    engine: Engine,
+    schema: str,
+    *,
+    score_version: str,
+    score_universe: str,
+) -> list[CorrelationResultView]:
     """读取 score-income correlation 检验结果."""
     sql = text(
         f"""
@@ -144,9 +163,8 @@ def load_correlation_results(engine: Engine, schema: str, *, score_version: str,
         """
     )
     with engine.connect() as connection:
-        return pd.DataFrame(
-            connection.execute(
-                sql,
-                {"score_version": score_version, "score_universe": score_universe},
-            ).mappings().all()
-        )
+        rows = connection.execute(
+            sql,
+            {"score_version": score_version, "score_universe": score_universe},
+        ).mappings().all()
+    return [CorrelationResultView.from_row(dict(row)) for row in rows]
