@@ -2,8 +2,16 @@
 from __future__ import annotations
 
 import math
+from typing import Any, cast
 
 import pandas as pd
+
+from data2001_assignment.task3_score.records import (
+    Sa2ScoreRecord,
+    ScoreInputRecord,
+    score_input_records_to_dataframe,
+    score_records_from_dataframe,
+)
 
 
 def sigmoid(value: float) -> float:
@@ -12,33 +20,37 @@ def sigmoid(value: float) -> float:
 
 
 def compute_scores(
-    sa2_counts: pd.DataFrame,
+    score_inputs: list[ScoreInputRecord],
     *,
     score_version: str,
     score_universe: str,
     min_population: int,
     output_scale: int,
-) -> pd.DataFrame:
+) -> list[Sa2ScoreRecord]:
     """根据每个 SA2 的 POI 数量计算 baseline score."""
+    sa2_counts = score_input_records_to_dataframe(score_inputs)
     required = {"sa2_code", "poi_count", "population"}
     missing = required.difference(sa2_counts.columns)
     if missing:
         raise ValueError(f"score 输入缺少字段: {sorted(missing)}")
 
     df = sa2_counts.copy()
-    df = df[df["population"].isna() | (df["population"] >= min_population)].copy()
+    population = cast(pd.Series, pd.to_numeric(df["population"], errors="coerce"))
+    population_mask = cast(pd.Series, population.isna() | (population >= min_population))
+    df = cast(pd.DataFrame, df.loc[population_mask].copy())
 
-    mean = float(df["poi_count"].mean())
-    std = float(df["poi_count"].std(ddof=0))
+    poi_count = cast(pd.Series, pd.to_numeric(df["poi_count"], errors="coerce"))
+    mean = float(cast(Any, poi_count.mean()))
+    std = float(cast(Any, poi_count.std(ddof=0)))
     if not std or pd.isna(std):
         df["z_poi"] = 0.0
     else:
-        df["z_poi"] = (df["poi_count"] - mean) / std
+        df["z_poi"] = (poi_count - mean) / std
 
     df["score_version"] = score_version
     df["score_universe"] = score_universe
     df["mean_poi_count"] = mean
     df["std_poi_count"] = std
-    df["score_raw"] = df["z_poi"].map(sigmoid)
+    df["score_raw"] = cast(pd.Series, df["z_poi"]).map(sigmoid)
     df["score_100"] = df["score_raw"] * output_scale
-    return df
+    return score_records_from_dataframe(df)
