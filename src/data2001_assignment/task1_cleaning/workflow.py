@@ -2,12 +2,12 @@ from pathlib import Path
 
 import pandas as pd
 
-from data2001_assignment.task1.cleaning.clean_column_names import clean_column_names
-from data2001_assignment.task1.cleaning.clean_missing_values import clean_missing_values
-from data2001_assignment.task1.cleaning.convert_numeric_columns import convert_numeric_columns
-from data2001_assignment.task1.cleaning.extract_unit_column import extract_unit_column
-from data2001_assignment.task1.cleaning.reshape_wide_to_long import reshape_wide_to_long
-from data2001_assignment.task1.cleaning.validate_and_flag_outliers import (
+from data2001_assignment.task1_cleaning.clean_column_names import clean_column_names
+from data2001_assignment.task1_cleaning.clean_missing_values import clean_missing_values
+from data2001_assignment.task1_cleaning.convert_numeric_columns import convert_numeric_columns
+from data2001_assignment.task1_cleaning.extract_unit_column import extract_unit_column
+from data2001_assignment.task1_cleaning.reshape_wide_to_long import reshape_wide_to_long
+from data2001_assignment.task1_cleaning.validate_and_flag_outliers import (
     validate_and_flag_outliers,
 )
 
@@ -44,7 +44,7 @@ def run_task1_cleaning(input_csv_path: str, output_csv_path: str | None = None) 
         df = cleaned_df
 
     if errors:
-        print("Cleaning pipeline errors:")
+        print("Cleaning workflow errors:")
         for error in errors:
             print(f"- {error}")
 
