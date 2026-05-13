@@ -1,5 +1,5 @@
 # Copy this file to configs/local.yaml and adjust local values.
-# Stable data-source defaults live in src/data2001_assignment/defaults.py.
+# Stable data-source defaults live in src/data2001/defaults.py.
 
 database:
   host: localhost
