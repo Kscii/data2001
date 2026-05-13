@@ -1,0 +1,35 @@
+# Copy this file to configs/local.yaml and adjust local values.
+# Stable data-source defaults live in src/data2001/defaults.py.
+
+database:
+  host: localhost
+  port: 5432
+  database: data2001
+  user: data2001
+  password: data2001
+  schema_name: data2001
+
+task2_import:
+  crawl_scope: greater_sydney
+  gccsa_name: Greater Sydney
+  selected_sa4_by_member: {}
+  sa4_codes: []
+  clean_batch_size: 1000
+
+task3_score:
+  score_universe: greater_sydney
+  min_population: 100
+  score_version: baseline
+
+workflow:
+  enabled_steps:
+    - plan_import
+    - import_boundaries
+    - import_poi
+    - import_income
+    - compute_score
+
+dashboard:
+  host: 0.0.0.0
+  port: 8050
+  debug: false
