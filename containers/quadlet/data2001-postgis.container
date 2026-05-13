@@ -1,0 +1,17 @@
+[Unit]
+Description=DATA2001 PostgreSQL/PostGIS database
+After=network-online.target
+
+[Container]
+Image=docker.io/postgis/postgis:16-3.4
+ContainerName=data2001-postgis
+Network=data2001.network
+PublishPort=127.0.0.1:5432:5432
+Volume=data2001-postgis-data:/var/lib/postgresql/data
+EnvironmentFile=%h/.config/data2001/postgres.env
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
