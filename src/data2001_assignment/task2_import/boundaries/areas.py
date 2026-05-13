@@ -1,11 +1,17 @@
-"""SA4/SA2 boundary 抓取、bbox 计算和数据库记录解析."""
+"""SA4/SA2 boundary 抓取、bbox 计算和业务记录解析."""
 from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Any
 
 from data2001_assignment.config import Settings
-from data2001_assignment.task2.arcgis_client import ArcGISClient
+from data2001_assignment.task2_import.api.arcgis_client import ArcGISClient
+from data2001_assignment.task2_import.records import (
+    ArcGISFeature,
+    BoundaryRecords,
+    Sa2AreaRecord,
+    Sa4AreaRecord,
+)
 
 
 @dataclass(frozen=True)
@@ -40,7 +46,7 @@ def selected_sa4_names(settings: Settings) -> list[str]:
     """从 unikey -> SA4 映射中取出去重后的 SA4 名称."""
     names = [
         name.strip()
-        for name in settings.task2.selected_sa4_by_member.values()
+        for name in settings.task2_import.selected_sa4_by_member.values()
         if name and name.strip()
     ]
     return sorted(set(names))
@@ -48,14 +54,14 @@ def selected_sa4_names(settings: Settings) -> list[str]:
 
 def build_sa4_where_clause(settings: Settings) -> str:
     """根据配置决定当前需要处理哪些 SA4."""
-    task2 = settings.task2
+    task2 = settings.task2_import
     if task2.crawl_scope == "greater_sydney":
         escaped_gccsa = task2.gccsa_name.replace("'", "''")
         return f"gccsa_name_2021 = '{escaped_gccsa}'"
 
     if task2.crawl_scope == "explicit_sa4_codes":
         if not task2.sa4_codes:
-            raise ValueError("crawl_scope=explicit_sa4_codes 时必须配置 task2.sa4_codes")
+            raise ValueError("crawl_scope=explicit_sa4_codes 时必须配置 task2_import.sa4_codes")
         return f"sa4_code_2021 IN ({_quote_values(task2.sa4_codes)})"
 
     names = selected_sa4_names(settings)
@@ -64,7 +70,7 @@ def build_sa4_where_clause(settings: Settings) -> str:
     return f"sa4_name_2021 IN ({_quote_values(names)})"
 
 
-def fetch_sa4_features(client: ArcGISClient, settings: Settings) -> list[dict[str, Any]]:
+def fetch_sa4_features(client: ArcGISClient, settings: Settings) -> list[ArcGISFeature]:
     """从 ABS ArcGIS API 抓取当前 scope 下的 SA4 features."""
     layer = settings.api.layer("sa4")
     params = {
@@ -77,7 +83,7 @@ def fetch_sa4_features(client: ArcGISClient, settings: Settings) -> list[dict[st
     return list(client.query_features(layer.url, params))
 
 
-def fetch_sa2_features_for_crawl(client: ArcGISClient, settings: Settings) -> list[dict[str, Any]]:
+def fetch_sa2_features_for_crawl(client: ArcGISClient, settings: Settings) -> list[ArcGISFeature]:
     """抓取当前 scope 下的 SA2；后续 POI 按这些 SA2 的 bbox 逐个请求."""
     layer = settings.api.layer("sa2")
     sa4_where = build_sa4_where_clause(settings)
@@ -91,7 +97,7 @@ def fetch_sa2_features_for_crawl(client: ArcGISClient, settings: Settings) -> li
     return list(client.query_features(layer.url, params))
 
 
-def fetch_boundaries(client: ArcGISClient, settings: Settings) -> dict[str, list[dict[str, Any]]]:
+def fetch_boundaries(client: ArcGISClient, settings: Settings) -> dict[str, list[ArcGISFeature]]:
     """请求 SA4/SA2 boundary 原始 features."""
     return {
         "sa4": fetch_sa4_features(client, settings),
@@ -124,48 +130,54 @@ def arcgis_polygon_to_geojson(geometry: dict[str, Any]) -> dict[str, Any]:
     return {"type": "Polygon", "coordinates": rings}
 
 
-def parse_boundaries(raw: dict[str, list[dict[str, Any]]]) -> dict[str, list[dict[str, Any]]]:
-    """把 boundary raw features 解析成数据库字段."""
-    sa4_records: list[dict[str, Any]] = []
+def parse_boundaries(raw: dict[str, list[ArcGISFeature]]) -> BoundaryRecords:
+    """把 boundary raw features 解析成显式的 SA4/SA2 业务记录."""
+    sa4_records: list[Sa4AreaRecord] = []
     for feature in raw["sa4"]:
         attrs = feature["attributes"]
         bbox = bbox_from_arcgis_geometry(feature["geometry"])
         sa4_records.append(
-            {
-                "sa4_code": attrs.get("sa4_code_2021"),
-                "sa4_name": attrs.get("sa4_name_2021"),
-                "gccsa_code": attrs.get("gccsa_code_2021"),
-                "gccsa_name": attrs.get("gccsa_name_2021"),
-                "state_code": attrs.get("state_code_2021"),
-                "state_name": attrs.get("state_name_2021"),
-                "area_albers_sqkm": attrs.get("area_albers_sqkm"),
-                "asgs_loci_uri": attrs.get("asgs_loci_uri_2021"),
-                "geometry_geojson": arcgis_polygon_to_geojson(feature["geometry"]),
-                **bbox.as_dict(),
-            }
+            Sa4AreaRecord(
+                sa4_code=attrs.get("sa4_code_2021"),
+                sa4_name=attrs.get("sa4_name_2021"),
+                gccsa_code=attrs.get("gccsa_code_2021"),
+                gccsa_name=attrs.get("gccsa_name_2021"),
+                state_code=attrs.get("state_code_2021"),
+                state_name=attrs.get("state_name_2021"),
+                area_albers_sqkm=attrs.get("area_albers_sqkm"),
+                asgs_loci_uri=attrs.get("asgs_loci_uri_2021"),
+                geometry_geojson=arcgis_polygon_to_geojson(feature["geometry"]),
+                bbox_minx=bbox.minx,
+                bbox_miny=bbox.miny,
+                bbox_maxx=bbox.maxx,
+                bbox_maxy=bbox.maxy,
+            )
         )
 
-    sa2_records: list[dict[str, Any]] = []
+    sa2_records: list[Sa2AreaRecord] = []
     for feature in raw["sa2"]:
         attrs = feature["attributes"]
         bbox = bbox_from_arcgis_geometry(feature["geometry"])
         sa2_records.append(
-            {
-                "sa2_code": attrs.get("sa2_code_2021"),
-                "sa2_name": attrs.get("sa2_name_2021"),
-                "sa3_code": attrs.get("sa3_code_2021"),
-                "sa3_name": attrs.get("sa3_name_2021"),
-                "sa4_code": attrs.get("sa4_code_2021"),
-                "sa4_name": attrs.get("sa4_name_2021"),
-                "gccsa_code": attrs.get("gccsa_code_2021"),
-                "gccsa_name": attrs.get("gccsa_name_2021"),
-                "state_code": attrs.get("state_code_2021"),
-                "state_name": attrs.get("state_name_2021"),
-                "area_albers_sqkm": attrs.get("area_albers_sqkm"),
-                "asgs_loci_uri": attrs.get("asgs_loci_uri_2021"),
-                "geometry_geojson": arcgis_polygon_to_geojson(feature["geometry"]),
-                **bbox.as_dict(),
-            }
+            Sa2AreaRecord(
+                sa2_code=attrs.get("sa2_code_2021"),
+                sa2_name=attrs.get("sa2_name_2021"),
+                sa3_code=attrs.get("sa3_code_2021"),
+                sa3_name=attrs.get("sa3_name_2021"),
+                sa4_code=attrs.get("sa4_code_2021"),
+                sa4_name=attrs.get("sa4_name_2021"),
+                gccsa_code=attrs.get("gccsa_code_2021"),
+                gccsa_name=attrs.get("gccsa_name_2021"),
+                state_code=attrs.get("state_code_2021"),
+                state_name=attrs.get("state_name_2021"),
+                area_albers_sqkm=attrs.get("area_albers_sqkm"),
+                asgs_loci_uri=attrs.get("asgs_loci_uri_2021"),
+                geometry_geojson=arcgis_polygon_to_geojson(feature["geometry"]),
+                bbox_minx=bbox.minx,
+                bbox_miny=bbox.miny,
+                bbox_maxx=bbox.maxx,
+                bbox_maxy=bbox.maxy,
+            )
         )
 
-    return {"sa4": sa4_records, "sa2": sa2_records}
+    return BoundaryRecords(sa4=sa4_records, sa2=sa2_records)

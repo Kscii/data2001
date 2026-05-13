@@ -7,6 +7,7 @@ from typing import Any, Iterable, Iterator
 
 from data2001_assignment.common.paths import resolve_project_path
 from data2001_assignment.config import Settings
+from data2001_assignment.task2_import.records import ArcGISFeature, ArcGISPayload
 
 
 def prepare_poi_raw_files(settings: Settings) -> tuple[Path, Path]:
@@ -30,7 +31,7 @@ def write_raw_response_file(
     source_code: str,
     offset: int,
     request_params: dict[str, Any],
-    payload: dict[str, Any],
+    payload: ArcGISPayload,
 ) -> Path:
     """保存单页 API response, 尽量保留请求参数和原始 payload."""
     path = response_dir / f"response_{sequence:06d}_{source_code}_{offset}.json"
@@ -42,7 +43,7 @@ def write_raw_response_file(
     return path
 
 
-def append_features_jsonl(features_path: Path, features: Iterable[dict[str, Any]]) -> int:
+def append_features_jsonl(features_path: Path, features: Iterable[ArcGISFeature]) -> int:
     """把 raw feature 追加成 JSONL；后续清洗可以流式读取."""
     count = 0
     with features_path.open("a", encoding="utf-8") as file:
@@ -53,7 +54,7 @@ def append_features_jsonl(features_path: Path, features: Iterable[dict[str, Any]
     return count
 
 
-def iter_features_jsonl(settings: Settings) -> Iterator[dict[str, Any]]:
+def iter_features_jsonl(settings: Settings) -> Iterator[ArcGISFeature]:
     """逐行读取 features.jsonl, 供清洗阶段流式消费."""
     features_path = resolve_project_path(settings.outputs.raw_poi_features_jsonl)
     if not features_path.exists():

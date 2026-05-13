@@ -9,6 +9,7 @@ from typing import Any
 import requests
 
 from data2001_assignment.config import LayerSettings
+from data2001_assignment.task2_import.records import ArcGISFeature, ArcGISPayload
 
 
 @dataclass(frozen=True)
@@ -19,7 +20,7 @@ class ArcGISClient:
     sleep_seconds: float
     page_size: int
 
-    def get_json(self, url: str, params: dict[str, Any]) -> dict[str, Any]:
+    def get_json(self, url: str, params: dict[str, Any]) -> ArcGISPayload:
         """发送 ArcGIS REST 请求, 并把服务端 error 统一转成异常."""
         last_error: Exception | None = None
         for attempt in range(self.max_retries):
@@ -36,14 +37,14 @@ class ArcGISClient:
                     time.sleep(self.sleep_seconds * (attempt + 1))
         raise RuntimeError(f"ArcGIS request failed after retries: {url}") from last_error
 
-    def get_metadata(self, layer: LayerSettings) -> dict[str, Any]:
+    def get_metadata(self, layer: LayerSettings) -> ArcGISPayload:
         """读取 layer metadata, 用于在请求前确认字段契约没有变化."""
         return self.get_json(layer.metadata_url, {"f": "json"})
 
-    def validate_layer_metadata(self, name: str, layer: LayerSettings) -> dict[str, Any]:
+    def validate_layer_metadata(self, name: str, layer: LayerSettings) -> ArcGISPayload:
         """校验 ArcGIS layer 的字段、geometry type 和 SRID.
 
-        如果远端接口字段变化, pipeline 必须停止, 避免用错误字段生成数据库结果.
+        如果远端接口字段变化, workflow 必须停止, 避免用错误字段生成数据库结果.
         """
         metadata = self.get_metadata(layer)
         fields = {field["name"] for field in metadata.get("fields", [])}
@@ -77,7 +78,7 @@ class ArcGISClient:
         params: dict[str, Any],
         *,
         page_size: int | None = None,
-    ) -> Iterator[tuple[int, dict[str, Any]]]:
+    ) -> Iterator[tuple[int, ArcGISPayload]]:
         """按页返回完整 payload, 供 raw response 持久化使用."""
         for offset, payload, _fetch_seconds in self.iter_query_pages_with_timing(
             url,
@@ -92,8 +93,8 @@ class ArcGISClient:
         params: dict[str, Any],
         *,
         page_size: int | None = None,
-    ) -> Iterator[tuple[int, dict[str, Any], float]]:
-        """按页返回 payload 和本页请求耗时, 供 pipeline 汇总阶段耗时."""
+    ) -> Iterator[tuple[int, ArcGISPayload, float]]:
+        """按页返回 payload 和本页请求耗时, 供 workflow 汇总阶段耗时."""
         offset = 0
         limit = page_size or self.page_size
 
@@ -120,7 +121,7 @@ class ArcGISClient:
         params: dict[str, Any],
         *,
         page_size: int | None = None,
-    ) -> Iterator[dict[str, Any]]:
+    ) -> Iterator[ArcGISFeature]:
         """按 resultOffset 分页返回 feature."""
         offset = 0
         limit = page_size or self.page_size
