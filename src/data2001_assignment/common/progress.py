@@ -1,4 +1,4 @@
-"""终端进度工具, 用于多步骤命令的动态编号和耗时输出."""
+"""Terminal progress helpers for multi-step workflows."""
 from __future__ import annotations
 
 import time
@@ -8,8 +8,8 @@ from typing import Any
 
 
 @dataclass(frozen=True)
-class PipelineStep:
-    """一个可执行 pipeline 步骤的名称、函数和启用状态."""
+class WorkflowStep:
+    """One executable workflow step."""
     name: str
     action: Callable[[], Any]
     enabled: bool = True
@@ -63,7 +63,7 @@ class ProgressReporter:
 
 def run_steps(
     title: str,
-    steps: list[PipelineStep],
+    steps: list[WorkflowStep],
     *,
     reporter: ProgressReporter | None = None,
 ) -> list[Any]:
