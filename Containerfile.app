@@ -14,4 +14,4 @@ ENV DATA2001_CONFIG="/app/configs/local.yaml"
 
 EXPOSE 8050
 
-CMD ["gunicorn", "data2001_assignment.visualisation.dashboard_wsgi:server", "--bind", "0.0.0.0:8050", "--workers", "2", "--threads", "4", "--timeout", "120"]
+CMD ["gunicorn", "data2001_assignment.task4_visuals.dashboard_wsgi:server", "--bind", "0.0.0.0:8050", "--workers", "2", "--threads", "4", "--timeout", "120"]

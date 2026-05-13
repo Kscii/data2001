@@ -66,7 +66,7 @@ podman run --rm \
   --network data2001 \
   --env-file "${APP_ENV_FILE}" \
   "${IMAGE_REF}" \
-  data2001 pipeline
+  data2001 run-workflow
 
 systemctl --user enable --now data2001-dashboard.service
 systemctl --user restart data2001-dashboard.service

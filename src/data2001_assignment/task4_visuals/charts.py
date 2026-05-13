@@ -1,6 +1,8 @@
 """Notebook、report 和 Dash 共用的 Plotly 统计图构建函数."""
 from __future__ import annotations
 
+from typing import Any, cast
+
 import numpy as np
 import pandas as pd
 import plotly.express as px
@@ -95,12 +97,9 @@ def build_sa4_score_boxplot(scores_df: pd.DataFrame) -> go.Figure:
 
 def build_poi_group_by_sa4_bar(poi_df: pd.DataFrame) -> go.Figure:
     """构建各 SA4 的 POI group 组成堆叠柱状图."""
-    grouped = (
-        poi_df.groupby(["sa4_name", "poigroup_name"], dropna=False)
-        .size()
-        .reset_index(name="poi_count")
-        .sort_values(["sa4_name", "poigroup_name"])
-    )
+    grouped = cast(Any, poi_df.groupby(["sa4_name", "poigroup_name"], dropna=False).size())
+    grouped = cast(pd.DataFrame, grouped.reset_index(name="poi_count"))
+    grouped = cast(pd.DataFrame, grouped.sort_values(by=["sa4_name", "poigroup_name"]))
     fig = px.bar(
         grouped,
         x="sa4_name",
