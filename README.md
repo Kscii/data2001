@@ -114,17 +114,17 @@ uv run data2001 check-db
 
 ```bash
 # 先查看当前配置会抓取哪些sa4, sa2和bbox
-uv run data2001 plan-crawl
+uv run data2001 plan-import
 ```
 
 ```bash
-# 一键运行配置中启用的pipeline steps
-uv run data2001 pipeline
+# 一键运行配置中启用的 workflow steps
+uv run data2001 run-workflow
 ```
 
 ```bash
-# 生成report使用的png figures
-uv run data2001 generate-figures
+# 生成 report 使用的 PNG charts
+uv run data2001 export-charts
 ```
 
 ```bash
@@ -141,7 +141,7 @@ uv run plotly_get_chrome
 
 ```bash
 # 本地启动visual dashboard服务器
-uv run data2001 dashboard
+uv run data2001 serve-dashboard
 # 然后浏览器打开终端中显示的端口
 ```
 
@@ -149,20 +149,20 @@ uv run data2001 dashboard
 
 - `uv run data2001 init-db`: 初始化schema, extension, table, index.
 - `uv run data2001 check-db`: 检查数据库, postgis, 表和srid.
-- `uv run data2001 plan-crawl`: 打印将要抓取的sa4 / sa2 / bbox, 不请求poi api.
-- `uv run data2001 load-boundaries`: 抓取并入库sa2/sa4 boundary和population.
-- `uv run data2001 fetch-poi`: 抓取poi raw json, 并清洗入库.
-- `uv run data2001 load-income`: 抓取并入库sa2 median income.
+- `uv run data2001 plan-import`: 打印将要抓取的sa4 / sa2 / bbox, 不请求poi api.
+- `uv run data2001 import-boundaries`: 抓取并入库sa2/sa4 boundary和population.
+- `uv run data2001 import-poi`: 抓取poi raw json, 并清洗入库.
+- `uv run data2001 import-income`: 抓取并入库sa2 median income.
 - `uv run data2001 compute-score`: 重新计算score和income correlation.
-- `uv run data2001 pipeline`: 执行配置中的完整主流程.
-- `uv run data2001 generate-figures`: 导出report使用的png figures.
-- `uv run data2001 dashboard`: 启动visual dashboard.
+- `uv run data2001 run-workflow`: 执行配置中的完整主流程.
+- `uv run data2001 export-charts`: 导出report使用的png figures.
+- `uv run data2001 serve-dashboard`: 启动visual dashboard.
 - `uv run data2001 clear-db --yes`: 清空业务表内容, 保留schema/table/index.
 - `uv run data2001 reset-db --yes`: 删除schema后重新初始化.
 
 ```bash
-# 使用指定配置文件运行pipeline
-uv run data2001 --config configs/local.yaml pipeline
+# 使用指定配置文件运行 workflow
+uv run data2001 --config configs/local.yaml run-workflow
 ```
 
 ## 技术栈
@@ -193,12 +193,12 @@ compose.yml                 本地postgis启动入口 (data import)
 核心package:
 
 ```text
-task1/          csv cleaning and statistics (task1)
-task2/          api extraction, boundary loading, poi cleaning, spatial assignment (task2)
-task3/          well-resourced score calculation (task3)
-analysis/       median income and correlation test (correlation analysis)
-visualisation/  notebook/report/dashboard shared figures (task4)
-db/             sqlalchemy database access (data import / score calculation)
+task1_cleaning/     CSV cleaning workflow (Task 1)
+task1_statistics/   derived statistics workflow (Task 1)
+task2_import/       API import, POI cleaning, spatial assignment (Task 2)
+task3_score/        well-resourced score and correlation (Task 3)
+task4_visuals/      notebook/report/dashboard shared charts (Task 4)
+db/repositories/    database admin/read/write repository modules
 ```
 
 ## 配置说明
@@ -218,12 +218,12 @@ configs/example.yaml
 常见需要修改的配置:
 
 - `database`: 本地postgresql/postgis连接信息. (data import)
-- `task2.crawl_scope`: 控制抓取greater sydney, selected sa4或explicit sa4 codes. (task2 / api extraction)
-- `task2.selected_sa4_by_member`: 记录unikey到sa4的映射, 便于member-level analysis. (task4 / results analysis)
-- `scoring.min_population`: 过滤人口过低的sa2. (task3 / score calculation)
-- `scoring.score_universe`: 控制score在selected sa4集合或greater sydney内计算. (task3 / score calculation)
+- `task2_import.crawl_scope`: 控制抓取greater sydney, selected sa4或explicit sa4 codes. (task2 / api extraction)
+- `task2_import.selected_sa4_by_member`: 记录unikey到sa4的映射, 便于member-level analysis. (task4 / results analysis)
+- `task3_score.min_population`: 过滤人口过低的sa2. (task3 / score calculation)
+- `task3_score.score_universe`: 控制score在selected sa4集合或greater sydney内计算. (task3 / score calculation)
 - `income.min_income_earners`: 过滤income sample过小的sa2. (correlation analysis)
-- `outputs.figures_dir`: report png输出目录. (task4 / data visualisations)
+- `outputs.charts_dir`: report png输出目录. (task4 / data visualisations)
 
 ## 输出内容
 
