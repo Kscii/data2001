@@ -21,7 +21,7 @@ dependencies = [
 ]
 
 [project.scripts]
-data2001 = "data2001_assignment.cli:main"
+data2001 = "data2001.cli:main"
 
 [build-system]
 requires = ["setuptools>=69"]
