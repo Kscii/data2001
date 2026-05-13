@@ -1,6 +1,7 @@
 __pycache__/
 .venv/
 *.egg-info/
+tests/
 
 data/processed/*
 data/statistics/*
