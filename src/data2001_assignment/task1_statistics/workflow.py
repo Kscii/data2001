@@ -1,14 +1,15 @@
 from pathlib import Path
+from typing import cast
 
 import pandas as pd
 
-from data2001_assignment.task1.statistics import (
+from data2001_assignment.task1_statistics import (
     dabi0142_statistics,
     jzho0172_statistics,
     xfan0282_statistics,
     xuyu8020_statistics,
 )
-from data2001_assignment.task1.statistics.statistic_result import StatisticResult
+from data2001_assignment.task1_statistics.statistic_result import StatisticResult
 
 EXPECTED_COLUMNS = [
     "member", # 你的unikey
@@ -57,7 +58,7 @@ def run_all_task1_statistics(df: pd.DataFrame) -> pd.DataFrame:
         results.append(result)
 
     if errors:
-        print("Statistics pipeline errors:")
+        print("Statistics workflow errors:")
         for error in errors:
             print(f"- {error}")
 
@@ -65,7 +66,7 @@ def run_all_task1_statistics(df: pd.DataFrame) -> pd.DataFrame:
         [result.to_dict() for result in results],
         columns=EXPECTED_COLUMNS,
     )
-    return statistics_df[EXPECTED_COLUMNS]
+    return cast(pd.DataFrame, statistics_df.loc[:, EXPECTED_COLUMNS])
 
 if __name__ == "__main__":
     input_csv = Path("data/processed/cleaned_data.csv")
