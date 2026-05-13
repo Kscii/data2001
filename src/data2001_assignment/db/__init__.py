@@ -1,1 +1,1 @@
-"""数据库连接和 SQL 辅助模块."""
+"""Database engine and repository modules."""
