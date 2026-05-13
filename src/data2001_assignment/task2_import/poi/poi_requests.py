@@ -5,8 +5,9 @@ from dataclasses import dataclass
 from typing import Any
 
 from data2001_assignment.config import Settings
-from data2001_assignment.task2.arcgis_client import ArcGISClient
-from data2001_assignment.task2.boundaries import BBox, bbox_from_arcgis_geometry
+from data2001_assignment.task2_import.api.arcgis_client import ArcGISClient
+from data2001_assignment.task2_import.boundaries.areas import BBox, bbox_from_arcgis_geometry
+from data2001_assignment.task2_import.records import ArcGISFeature
 
 
 @dataclass(frozen=True)
@@ -34,7 +35,7 @@ def build_poi_bbox_params(settings: Settings, bbox: BBox) -> dict[str, Any]:
     }
 
 
-def build_sa2_bbox_requests(sa2_features: list[dict[str, Any]]) -> list[POIFetchRequest]:
+def build_sa2_bbox_requests(sa2_features: list[ArcGISFeature]) -> list[POIFetchRequest]:
     """特定 SA4 或 Greater Sydney 抓取时, 都按 SA2 bbox 逐个抓 POI."""
     requests: list[POIFetchRequest] = []
     for feature in sa2_features:
@@ -54,7 +55,7 @@ def fetch_poi_within_bbox(
     client: ArcGISClient,
     settings: Settings,
     bbox: BBox,
-) -> list[dict[str, Any]]:
+) -> list[ArcGISFeature]:
     """作业要求的通用函数：返回一个 bbox 内的所有 POI."""
     params = build_poi_bbox_params(settings, bbox)
     return list(client.query_features(settings.api.layer("poi").url, params, page_size=settings.api.page_size))
