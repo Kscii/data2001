@@ -20,16 +20,10 @@ from data2001.task4.maps import (
     build_score_choropleth_map,
 )
 from data2001.task4.queries import (
-    select_poi_group_counts,
-    select_poi_points,
-    select_sa2_scores,
-    select_score_income,
-)
-from data2001.task4.records import (
-    poi_group_count_views_to_dataframe,
-    poi_point_views_to_dataframe,
-    sa2_score_views_to_dataframe,
-    score_income_views_to_dataframe,
+    load_poi_group_counts,
+    load_poi_points,
+    load_sa2_scores,
+    load_score_income,
 )
 
 
@@ -48,28 +42,10 @@ def write_png(fig: go.Figure, path: Path, settings: Settings) -> None:
 def export_report_charts(engine: Engine, settings: Settings) -> dict[str, Path]:
     """查询数据库并生成 report 需要的所有 PNG 图表."""
     charts_dir = resolve_project_path(settings.outputs.charts_dir)
-    scores = sa2_score_views_to_dataframe(
-        select_sa2_scores(
-            engine,
-            settings.database.schema_name,
-            score_version=settings.task3_score.score_version,
-            score_universe=settings.task3_score.score_universe,
-        )
-    )
-    group_counts = poi_group_count_views_to_dataframe(
-        select_poi_group_counts(engine, settings.database.schema_name)
-    )
-    score_income = score_income_views_to_dataframe(
-        select_score_income(
-            engine,
-            settings.database.schema_name,
-            score_version=settings.task3_score.score_version,
-            score_universe=settings.task3_score.score_universe,
-        )
-    )
-    poi_points = poi_point_views_to_dataframe(
-        select_poi_points(engine, settings.database.schema_name)
-    )
+    scores = load_sa2_scores(engine, settings)
+    group_counts = load_poi_group_counts(engine, settings)
+    score_income = load_score_income(engine, settings)
+    poi_points = load_poi_points(engine, settings)
 
     charts: dict[str, go.Figure] = {
         "score_histogram.png": build_score_histogram(scores, nbins=settings.charts.score_histogram_nbins),
