@@ -36,24 +36,16 @@ from data2001.task4.maps import (
     build_score_choropleth_map,
 )
 from data2001.task4.queries import (
-    select_correlation_results,
-    select_poi_points,
-    select_sa2_scores,
-    select_score_income,
-)
-from data2001.task4.records import (
-    correlation_result_views_to_dataframe,
-    poi_point_views_to_dataframe,
-    sa2_score_views_to_dataframe,
-    score_income_views_to_dataframe,
+    load_correlation_results,
+    load_poi_points,
+    load_sa2_scores,
+    load_score_income,
 )
 from data2001.task4.tables import build_sa4_summary_table
 
 
 def register_dashboard_callbacks(app: Dash, engine: Engine, settings: Settings) -> None:
     """把 dashboard callback 注册到 Dash app."""
-    schema = settings.database.schema_name
-
     @app.callback(
         Output("tab-content", "children"),
         Output("kpi-row", "children"),
@@ -70,33 +62,10 @@ def register_dashboard_callbacks(app: Dash, engine: Engine, settings: Settings) 
         poi_groups = [str(value) for value in as_list(group_value)]
         n = max(int(top_n or settings.dashboard.default_top_n), 1)
         try:
-            scores = sa2_score_views_to_dataframe(
-                select_sa2_scores(
-                    engine,
-                    schema,
-                    score_version=settings.task3_score.score_version,
-                    score_universe=settings.task3_score.score_universe,
-                )
-            )
-            poi = poi_point_views_to_dataframe(
-                select_poi_points(engine, schema, limit=settings.dashboard.poi_limit)
-            )
-            score_income = score_income_views_to_dataframe(
-                select_score_income(
-                    engine,
-                    schema,
-                    score_version=settings.task3_score.score_version,
-                    score_universe=settings.task3_score.score_universe,
-                )
-            )
-            correlation = correlation_result_views_to_dataframe(
-                select_correlation_results(
-                    engine,
-                    schema,
-                    score_version=settings.task3_score.score_version,
-                    score_universe=settings.task3_score.score_universe,
-                )
-            )
+            scores = load_sa2_scores(engine, settings)
+            poi = load_poi_points(engine, settings, limit=settings.dashboard.poi_limit)
+            score_income = load_score_income(engine, settings)
+            correlation = load_correlation_results(engine, settings)
         except SQLAlchemyError as exc:
             message = html.Div(f"Database query failed: {exc}", className="panel")
             return message, kpi_cards(pd.DataFrame(), pd.DataFrame(), pd.DataFrame())
