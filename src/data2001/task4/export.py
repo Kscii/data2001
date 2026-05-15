@@ -8,24 +8,24 @@ from sqlalchemy import Engine
 
 from data2001.common.paths import resolve_project_path
 from data2001.config import Settings
-from data2001.task4_visuals.charts import (
+from data2001.task4.charts import (
     build_bottom_sa2_bar,
     build_poi_group_distribution,
     build_score_histogram,
     build_score_income_scatter,
     build_top_sa2_bar,
 )
-from data2001.task4_visuals.maps import (
+from data2001.task4.maps import (
     build_poi_point_scatter_map,
     build_score_choropleth_map,
 )
-from data2001.task4_visuals.queries import (
+from data2001.task4.queries import (
     select_poi_group_counts,
     select_poi_points,
     select_sa2_scores,
     select_score_income,
 )
-from data2001.task4_visuals.records import (
+from data2001.task4.records import (
     poi_group_count_views_to_dataframe,
     poi_point_views_to_dataframe,
     sa2_score_views_to_dataframe,

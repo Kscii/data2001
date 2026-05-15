@@ -12,8 +12,8 @@ from sqlalchemy import Engine
 from sqlalchemy.exc import SQLAlchemyError
 
 from data2001.config import Settings
-from data2001.task4_visuals.queries import select_poi_points, select_sa2_scores
-from data2001.task4_visuals.records import (
+from data2001.task4.queries import select_poi_points, select_sa2_scores
+from data2001.task4.records import (
     poi_point_views_to_dataframe,
     sa2_score_views_to_dataframe,
 )
