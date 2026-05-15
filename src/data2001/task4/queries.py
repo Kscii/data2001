@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from sqlalchemy import Engine, text
 
-from data2001.task4_visuals.records import (
+from data2001.task4.records import (
     CorrelationResultView,
     PoiGroupCountView,
     PoiPointView,
