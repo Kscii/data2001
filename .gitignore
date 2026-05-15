@@ -11,3 +11,7 @@ configs/local.yaml
 .env
 *.env
 !*.env.example
+
+# Local-only documentation drafts
+docs/deployment.md
+docs/notebook_report_guide.md
