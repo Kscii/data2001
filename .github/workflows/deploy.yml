@@ -31,7 +31,7 @@ jobs:
 
       - name: Check package
         run: |
-          uv run python -m compileall src/data2001_assignment
+          uv run python -m compileall src/data2001
 
       - name: Compute image name
         run: echo "IMAGE_NAME=ghcr.io/${GITHUB_REPOSITORY,,}/data2001-app" >> "$GITHUB_ENV"
