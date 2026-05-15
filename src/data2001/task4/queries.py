@@ -22,8 +22,10 @@ from data2001.task2_import.boundaries.areas import selected_sa4_names
 
 
 def load_sa2_scores(engine: Engine, settings: Settings) -> pd.DataFrame:
-    """读取带 SA2 geometry 的 score 数据, 用于图表和地图."""
+    """读取带 SA2 geometry 的 score 数据, 仅限指定 SA4 范围."""
     schema = settings.database.schema_name
+    sa4_names = selected_sa4_names(settings)
+    sa4_list = ", ".join(f"'{name.replace(chr(39), chr(39)*2)}'" for name in sa4_names)
     sql = text(
         f"""
         SELECT
@@ -44,6 +46,7 @@ def load_sa2_scores(engine: Engine, settings: Settings) -> pd.DataFrame:
           ON area.sa2_code = s.sa2_code
         WHERE s.score_version = :score_version
           AND s.score_universe = :score_universe
+          AND area.sa4_name IN ({sa4_list})
         ORDER BY area.sa4_name, area.sa2_name
         """
     )
@@ -60,16 +63,23 @@ def load_sa2_scores(engine: Engine, settings: Settings) -> pd.DataFrame:
 
 
 def load_poi_group_counts(engine: Engine, settings: Settings) -> pd.DataFrame:
-    """按 POI group 聚合 POI 数量."""
+    """按 POI group 聚合 POI 数量, 仅限指定 SA4 范围."""
     schema = settings.database.schema_name
+    sa4_names = selected_sa4_names(settings)
+    sa4_list = ", ".join(f"'{name.replace(chr(39), chr(39)*2)}'" for name in sa4_names)
     sql = text(
         f"""
         SELECT
-            COALESCE(poigroup_name, 'Unknown') AS poigroup_name,
-            poigroup_code,
+            COALESCE(p.poigroup_name, 'Unknown') AS poigroup_name,
+            p.poigroup_code,
             COUNT(*)::integer AS poi_count
-        FROM {schema}.poi_clean
-        GROUP BY poigroup_name, poigroup_code
+        FROM {schema}.poi_clean p
+        LEFT JOIN {schema}.sa2_poi assigned
+          ON assigned.poi_objectid = p.objectid
+        LEFT JOIN {schema}.sa2 area
+          ON area.sa2_code = assigned.sa2_code
+        WHERE area.sa4_name IN ({sa4_list})
+        GROUP BY p.poigroup_name, p.poigroup_code
         ORDER BY poi_count DESC, poigroup_name
         """
     )
@@ -83,9 +93,11 @@ def load_poi_points(
     *,
     limit: int | None = None,
 ) -> pd.DataFrame:
-    """读取 POI 点位及其 SA2/SA4 归属信息."""
+    """读取 POI 点位及其 SA2/SA4 归属信息, 仅限指定 SA4 范围."""
     schema = settings.database.schema_name
     limit_clause = "LIMIT :limit" if limit is not None else ""
+    sa4_names = selected_sa4_names(settings)
+    sa4_list = ", ".join(f"'{name.replace(chr(39), chr(39)*2)}'" for name in sa4_names)
     sql = text(
         f"""
         SELECT
@@ -107,6 +119,7 @@ def load_poi_points(
           ON area.sa2_code = assigned.sa2_code
         WHERE poi.longitude IS NOT NULL
           AND poi.latitude IS NOT NULL
+          AND area.sa4_name IN ({sa4_list})
         ORDER BY poi.objectid
         {limit_clause}
         """
@@ -117,8 +130,10 @@ def load_poi_points(
 
 
 def load_score_income(engine: Engine, settings: Settings) -> pd.DataFrame:
-    """读取 score 与 median income 已 join 的数据."""
+    """读取 score 与 median income 已 join 的数据, 仅限指定 SA4 范围."""
     schema = settings.database.schema_name
+    sa4_names = selected_sa4_names(settings)
+    sa4_list = ", ".join(f"'{name.replace(chr(39), chr(39)*2)}'" for name in sa4_names)
     sql = text(
         f"""
         SELECT
@@ -137,6 +152,7 @@ def load_score_income(engine: Engine, settings: Settings) -> pd.DataFrame:
           ON income.sa2_code = score.sa2_code
         WHERE score.score_version = :score_version
           AND score.score_universe = :score_universe
+          AND area.sa4_name IN ({sa4_list})
         ORDER BY area.sa4_name, area.sa2_name
         """
     )
