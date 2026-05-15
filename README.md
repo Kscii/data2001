@@ -124,7 +124,7 @@ uv run data2001 run-workflow
 
 ```bash
 # 生成 report 使用的 PNG charts
-uv run data2001 export-charts
+uv run data2001 generate-figures
 ```
 
 ```bash
@@ -141,7 +141,7 @@ uv run plotly_get_chrome
 
 ```bash
 # 本地启动visual dashboard服务器
-uv run data2001 serve-dashboard
+uv run data2001 dashboard
 # 然后浏览器打开终端中显示的端口
 ```
 
@@ -155,8 +155,8 @@ uv run data2001 serve-dashboard
 - `uv run data2001 import-income`: 抓取并入库sa2 median income.
 - `uv run data2001 compute-score`: 重新计算score和income correlation.
 - `uv run data2001 run-workflow`: 执行配置中的完整主流程.
-- `uv run data2001 export-charts`: 导出report使用的png figures.
-- `uv run data2001 serve-dashboard`: 启动visual dashboard.
+- `uv run data2001 generate-figures`: 导出report使用的png figures.
+- `uv run data2001 dashboard`: 启动visual dashboard.
 - `uv run data2001 clear-db --yes`: 清空业务表内容, 保留schema/table/index.
 - `uv run data2001 reset-db --yes`: 删除schema后重新初始化.
 
@@ -186,7 +186,7 @@ docs/                       设计, 数据库, 容器和快速上手文档
 notebooks/                  notebook workflow (task1-4 explanation)
 report/                     final report和png figures (task4)
 sql/                        postgis schema和indexes (database schema / indexing)
-src/data2001_assignment/    python package主体
+src/data2001/               python package主体
 compose.yml                 本地postgis启动入口 (data import)
 ```
 
@@ -197,7 +197,7 @@ task1_cleaning/     CSV cleaning workflow (Task 1)
 task1_statistics/   derived statistics workflow (Task 1)
 task2_import/       API import, POI cleaning, spatial assignment (Task 2)
 task3_score/        well-resourced score and correlation (Task 3)
-task4_visuals/      notebook/report/dashboard shared charts (Task 4)
+task4/              notebook/report/dashboard shared charts (Task 4)
 db/repositories/    database admin/read/write repository modules
 ```
 
