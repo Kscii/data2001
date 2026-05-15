@@ -1,23 +1,175 @@
 import pandas as pd
+
 from data2001.task1_statistics.statistic_result import StatisticResult
 
 # 返回接口使用StatisticResult中定义的dataclass的格式
 # 函数推荐命名为unikey-{统计函数编号}，如: xfan0282-1
 
+
+MEMBER = "xfan0282"
+
+
+def _measure_code_column(df: pd.DataFrame) -> str:
+    if "measure_code" in df.columns:
+        return "measure_code"
+    if "Measure Code" in df.columns:
+        return "Measure Code"
+    raise KeyError("Task 1 data is missing a measure code column")
+
+
+def _value(df: pd.DataFrame, measure_code: str, year: int) -> float:
+    """Read one measure/year value from either raw wide data or cleaned long data."""
+    code_column = _measure_code_column(df)
+
+    if {"year", "value"}.issubset(df.columns):
+        rows = df[
+            (df[code_column] == measure_code)
+            & (pd.to_numeric(df["year"], errors="coerce") == year)
+        ]
+        if rows.empty:
+            raise KeyError(f"Missing value for {measure_code} in {year}")
+        value = pd.to_numeric(rows.iloc[0]["value"], errors="coerce")
+    else:
+        year_column = str(year)
+        if year_column not in df.columns:
+            raise KeyError(f"Task 1 data is missing year column {year_column}")
+        rows = df[df[code_column] == measure_code]
+        if rows.empty:
+            raise KeyError(f"Missing measure {measure_code}")
+        value = pd.to_numeric(rows.iloc[0][year_column], errors="coerce")
+
+    if pd.isna(value):
+        raise ValueError(f"Value for {measure_code} in {year} is empty")
+    return float(value)
+
+
+def _share(df: pd.DataFrame, numerator_code: str, denominator_code: str, year: int) -> float:
+    return _value(df, numerator_code, year) / _value(df, denominator_code, year) * 100
+
+
+def _percentage_point_change(start: float, end: float) -> float:
+    return end - start
+
+
+def _ratio(numerator: float, denominator: float) -> float:
+    if denominator == 0:
+        raise ZeroDivisionError("Cannot calculate ratio with zero denominator")
+    return numerator / denominator
+
+
 def xfan0282_1(df: pd.DataFrame) -> StatisticResult:
-    raise NotImplementedError("xfan0282_1 is not implemented yet")
+    separate_2011 = _share(df, "DWELL_2", "DWELL_7", 2011)
+    separate_2021 = _share(df, "DWELL_2", "DWELL_7", 2021)
+    apartment_2011 = _share(df, "DWELL_4", "DWELL_7", 2011)
+    apartment_2021 = _share(df, "DWELL_4", "DWELL_7", 2021)
+
+    apartment_change = _percentage_point_change(apartment_2011, apartment_2021)
+    separate_change = _percentage_point_change(separate_2011, separate_2021)
+
+    return StatisticResult(
+        member=MEMBER,
+        statistic_id="xfan0282-1",
+        title="Apartment share increase among occupied private dwellings, 2011-2021",
+        value=round(apartment_change, 2),
+        unit="percentage points",
+        description=(
+            f"Apartment share rose from {apartment_2011:.2f}% to {apartment_2021:.2f}% "
+            f"(+{apartment_change:.2f} percentage points), while separate house share "
+            f"changed from {separate_2011:.2f}% to {separate_2021:.2f}% "
+            f"({separate_change:.2f} percentage points). This sets up the housing "
+            "and daily-life pressure story."
+        ),
+    )
 
 def xfan0282_2(df: pd.DataFrame) -> StatisticResult:
-    raise NotImplementedError("xfan0282_2 is not implemented yet")
+    wfh_2016 = _share(df, "WORK_TRAV_14", "WORK_TRAV_17", 2016)
+    wfh_2021 = _share(df, "WORK_TRAV_14", "WORK_TRAV_17", 2021)
+    growth_ratio = _ratio(wfh_2021, wfh_2016)
+
+    return StatisticResult(
+        member=MEMBER,
+        statistic_id="xfan0282-2",
+        title="Work-from-home share growth, 2016-2021",
+        value=round(growth_ratio, 2),
+        unit="times",
+        description=(
+            f"Work-from-home share rose from {wfh_2016:.2f}% in 2016 to "
+            f"{wfh_2021:.2f}% in 2021, or about {growth_ratio:.2f} times higher. "
+            "This explains why the next statistic checks travel mode change."
+        ),
+    )
 
 def xfan0282_3(df: pd.DataFrame) -> StatisticResult:
-    raise NotImplementedError("xfan0282_3 is not implemented yet")
+    public_transport_2016 = _share(df, "WORK_TRAV_23", "WORK_TRAV_17", 2016)
+    public_transport_2021 = _share(df, "WORK_TRAV_23", "WORK_TRAV_17", 2021)
+    drop = public_transport_2016 - public_transport_2021
+
+    return StatisticResult(
+        member=MEMBER,
+        statistic_id="xfan0282-3",
+        title="Public transport commute share drop, 2016-2021",
+        value=round(drop, 2),
+        unit="percentage points",
+        description=(
+            f"Public transport as at least one travel method fell from "
+            f"{public_transport_2016:.2f}% to {public_transport_2021:.2f}%, "
+            f"a drop of {drop:.2f} percentage points. This supports the idea "
+            "that 2021 travel behaviour was not normal."
+        ),
+    )
 
 def xfan0282_4(df: pd.DataFrame) -> StatisticResult:
-    raise NotImplementedError("xfan0282_4 is not implemented yet")
+    occupation_commute_codes = {
+        "managers": "COMMUTE_10",
+        "professionals": "COMMUTE_11",
+        "technicians/trades": "COMMUTE_12",
+        "community/service": "COMMUTE_13",
+        "machinery/drivers": "COMMUTE_16",
+        "labourers": "COMMUTE_17",
+    }
+    commute_by_occupation = {
+        occupation: _value(df, measure_code, 2016)
+        for occupation, measure_code in occupation_commute_codes.items()
+    }
+    longest_occupation = max(commute_by_occupation, key=commute_by_occupation.get)
+    shortest_occupation = min(commute_by_occupation, key=commute_by_occupation.get)
+    gap = commute_by_occupation[longest_occupation] - commute_by_occupation[shortest_occupation]
+
+    return StatisticResult(
+        member=MEMBER,
+        statistic_id="xfan0282-4",
+        title="Occupation commute distance gap, 2016",
+        value=round(gap, 2),
+        unit="km",
+        description=(
+            f"In 2016, {longest_occupation} had the longest average commute "
+            f"({commute_by_occupation[longest_occupation]:.1f} km), while "
+            f"{shortest_occupation} had the shortest "
+            f"({commute_by_occupation[shortest_occupation]:.1f} km). "
+            f"The gap was {gap:.1f} km, showing that commute burden was uneven "
+            "even before the 2021 work-from-home shift."
+        ),
+    )
 
 def xfan0282_5(df: pd.DataFrame) -> StatisticResult:
-    raise NotImplementedError("xfan0282_5 is not implemented yet")
+    rent_stress = _value(df, "STRESS_17", 2021)
+    mortgage_stress = _value(df, "STRESS_15", 2021)
+    stress_ratio = _ratio(rent_stress, mortgage_stress)
+
+    return StatisticResult(
+        member=MEMBER,
+        statistic_id="xfan0282-5",
+        title="Rent stress relative to mortgage stress, 2021",
+        value=round(stress_ratio, 2),
+        unit="times",
+        description=(
+            f"In 2021, {rent_stress:.1f}% of renting households spent more than "
+            f"30% of income on rent, compared with {mortgage_stress:.1f}% for "
+            f"mortgage repayments. Rent stress was about {stress_ratio:.2f} "
+            "times mortgage stress, so housing pressure remained important even "
+            "when work and travel patterns changed."
+        ),
+    )
 
 STATISTICS = [
     xfan0282_1,
