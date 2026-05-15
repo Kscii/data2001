@@ -1,9 +1,5 @@
 # 接口字段和数据库交接文档
 
-本文档面向组员交接，集中说明 Task 2-4 使用的数据接口、配置位置、数据库表和常用输出。
-
-CSV 只用于 Task 1；Task 2-4 的数据来自 ArcGIS REST API，并写入本地 PostgreSQL/PostGIS。
-
 ## 1. 配置入口
 
 本地配置文件：
@@ -18,7 +14,7 @@ configs/local.yaml
 configs/example.yaml
 ```
 
-主要配置节：
+主要配置：
 
 ```text
 database      PostgreSQL/PostGIS 连接
@@ -358,16 +354,4 @@ report/figures/bottom_sa2_score.png
 report/figures/poi_group_distribution.png
 report/figures/score_income_correlation.png
 report/figures/sa2_score_choropleth.png
-```
-
-## 7. 组员交接检查
-
-交接时请确认：
-
-```text
-1. configs/local.yaml 的 database 和 task2 配置正确。
-2. podman compose up -d 后 uv run data2001 check-db 通过。
-3. uv run data2001 plan-import 显示的 SA4/SA2 范围符合预期。
-4. uv run data2001 run-workflow 能完成 API 抓取、入库和 score 计算。
-5. notebook 使用同一个 configs/local.yaml 和同一个本地数据库。
 ```
