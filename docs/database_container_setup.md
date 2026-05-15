@@ -1,7 +1,5 @@
 # 数据库容器启动指南
 
-本文档给组员本地开发使用，只说明如何在自己的电脑上启动 PostgreSQL/PostGIS 数据库。线上运行说明统一写在本地忽略的 `docs/deployment.md`。
-
 项目默认数据库连接如下：
 
 ```text
@@ -50,20 +48,6 @@ podman machine start
 podman info
 ```
 
-常见 Linux：
-
-```bash
-# Arch / Manjaro
-sudo pacman -S podman
-
-# Ubuntu / Debian
-sudo apt-get update
-sudo apt-get -y install podman
-
-# Fedora
-sudo dnf -y install podman
-```
-
 ## 3. 使用 Compose 启动数据库
 
 这是组员本地开发推荐方式，macOS、Windows、Linux 都可以使用。
@@ -108,7 +92,7 @@ docker compose down
 
 ## 4. 初始化项目数据库
 
-数据库容器启动后，在项目根目录运行：
+数据库容器启动后，在项目根目录运行(也可以直接使用notebook运行)：
 
 ```bash
 uv sync
@@ -159,13 +143,6 @@ uv run data2001 init-db
 ```
 
 ## 6. 常见问题
-
-如果端口冲突：
-
-```text
-症状：connection refused、address already in use、或 check-db 连接到错误数据库。
-处理：修改 compose.yml 的 host port，并同步修改 configs/local.yaml 的 database.port。
-```
 
 如果容器名冲突：
 
