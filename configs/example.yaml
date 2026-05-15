@@ -10,14 +10,20 @@ database:
   schema_name: data2001
 
 task2_import:
-  crawl_scope: greater_sydney
+  # For submission evidence, each member can work on one selected SA4.
+  # Use `greater_sydney` only when the whole-region run is required.
+  crawl_scope: selected_sa4
   gccsa_name: Greater Sydney
-  selected_sa4_by_member: {}
+  selected_sa4_by_member:
+    xfan0282: Sydney - City and Inner South
+    dabi0142: Sydney - Parramatta
+    jzho0172: Sydney - North Sydney and Hornsby
+    xuyu8020: Sydney - Eastern Suburbs
   sa4_codes: []
   clean_batch_size: 1000
 
 task3_score:
-  score_universe: greater_sydney
+  score_universe: selected_sa4
   min_population: 100
   score_version: baseline
 

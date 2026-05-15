@@ -9,7 +9,7 @@ from dash.dcc.Tabs import Tabs
 from sqlalchemy import Engine
 
 from data2001.config import Settings
-from data2001.task4_visuals.dashboard.helpers import initial_options
+from data2001.task4.dashboard.helpers import initial_options
 
 DASH_INDEX_STRING = """
 <!DOCTYPE html>
