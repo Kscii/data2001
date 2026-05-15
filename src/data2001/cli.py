@@ -36,7 +36,7 @@ def build_parser() -> argparse.ArgumentParser:
     workflow_parser = subparsers.add_parser("run-workflow", parents=[common_parser])
     workflow_parser.add_argument("--yes", action="store_true")
 
-    subparsers.add_parser("serve-dashboard", parents=[common_parser])
+    subparsers.add_parser("dashboard", parents=[common_parser])
     return parser
 
 
@@ -99,8 +99,8 @@ def main() -> None:
         _run_db_command(action)
         return
 
-    if args.command == "serve-dashboard":
-        from data2001.task4_visuals.dashboard import create_dashboard_app
+    if args.command == "dashboard":
+        from data2001.task4.dashboard import create_dashboard_app
 
         app = create_dashboard_app(engine, settings)
         app.run(
