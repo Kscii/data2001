@@ -23,7 +23,7 @@ from data2001.task2_import.workflow import (
     run_poi_import,
 )
 from data2001.task3_score.workflow import run_task3_score_workflow
-from data2001.task4_visuals.export import export_report_charts
+from data2001.task4.export import export_report_charts
 
 
 @dataclass(frozen=True)
@@ -123,7 +123,7 @@ STEP_DEFINITIONS = [
     StepDefinition("import_poi", "import-poi", "Import raw JSON and clean POI", False, run_import_poi_step),
     StepDefinition("import_income", "import-income", "Import SA2 income", False, run_import_income_step),
     StepDefinition("compute_score", "compute-score", "Compute score and income correlation", False, run_compute_score_step),
-    StepDefinition("export_charts", "export-charts", "Build Plotly charts and export PNG", False, run_export_charts_step),
+    StepDefinition("export_charts", "generate-figures", "Build Plotly charts and export PNG", False, run_export_charts_step),
     StepDefinition("clear_db", "clear-db", "Clear business tables", True, run_clear_db_step),
     StepDefinition("reset_db", "reset-db", "Reset schema and reinitialize", True, run_reset_db_step),
 ]

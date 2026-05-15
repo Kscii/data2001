@@ -8,7 +8,7 @@ from sqlalchemy import Engine
 from sqlalchemy.exc import SQLAlchemyError
 
 from data2001.config import Settings
-from data2001.task4_visuals.charts import (
+from data2001.task4.charts import (
     build_bottom_sa2_bar,
     build_poi_group_distribution,
     build_poi_group_by_sa4_bar,
@@ -17,7 +17,7 @@ from data2001.task4_visuals.charts import (
     build_score_income_scatter,
     build_top_sa2_bar,
 )
-from data2001.task4_visuals.dashboard.helpers import (
+from data2001.task4.dashboard.helpers import (
     as_list,
     correlation_summary,
     data_table,
@@ -31,23 +31,23 @@ from data2001.task4_visuals.dashboard.helpers import (
     table_columns,
     table_records,
 )
-from data2001.task4_visuals.maps import (
+from data2001.task4.maps import (
     build_poi_point_scatter_map,
     build_score_choropleth_map,
 )
-from data2001.task4_visuals.queries import (
+from data2001.task4.queries import (
     select_correlation_results,
     select_poi_points,
     select_sa2_scores,
     select_score_income,
 )
-from data2001.task4_visuals.records import (
+from data2001.task4.records import (
     correlation_result_views_to_dataframe,
     poi_point_views_to_dataframe,
     sa2_score_views_to_dataframe,
     score_income_views_to_dataframe,
 )
-from data2001.task4_visuals.tables import build_sa4_summary_table
+from data2001.task4.tables import build_sa4_summary_table
 
 
 def register_dashboard_callbacks(app: Dash, engine: Engine, settings: Settings) -> None:
