@@ -12,11 +12,7 @@ from sqlalchemy import Engine
 from sqlalchemy.exc import SQLAlchemyError
 
 from data2001.config import Settings
-from data2001.task4.queries import select_poi_points, select_sa2_scores
-from data2001.task4.records import (
-    poi_point_views_to_dataframe,
-    sa2_score_views_to_dataframe,
-)
+from data2001.task4.queries import load_poi_points, load_sa2_scores
 
 T = TypeVar("T")
 
@@ -215,18 +211,8 @@ def unique_options(df: pd.DataFrame, column: str) -> list[dict[str, Any]]:
 
 def initial_options(engine: Engine, settings: Settings) -> dict[str, list[dict[str, Any]]]:
     """页面首次加载时从数据库读取筛选器候选值."""
-    schema = settings.database.schema_name
-    scores = safe_load(pd.DataFrame(), lambda: sa2_score_views_to_dataframe(
-        select_sa2_scores(
-            engine,
-            schema,
-            score_version=settings.task3_score.score_version,
-            score_universe=settings.task3_score.score_universe,
-        )
-    ))
-    poi = safe_load(pd.DataFrame(), lambda: poi_point_views_to_dataframe(
-        select_poi_points(engine, schema, limit=settings.dashboard.poi_limit)
-    ))
+    scores = safe_load(pd.DataFrame(), lambda: load_sa2_scores(engine, settings))
+    poi = safe_load(pd.DataFrame(), lambda: load_poi_points(engine, settings, limit=settings.dashboard.poi_limit))
     return {
         "sa4": unique_options(scores, "sa4_name"),
         "sa2": unique_options(scores, "sa2_code"),
