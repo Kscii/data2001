@@ -142,10 +142,8 @@ def upsert_poi_records(engine: Engine, schema: str, records: list[dict[str, Any]
 
 def assign_poi_to_sa2(engine: Engine, schema: str, assignment_method: str) -> None:
     """Assign every POI to one SA2 with ST_Covers."""
-    sql = text(
+    insert_sql = text(
         f"""
-        TRUNCATE TABLE {schema}.sa2_poi;
-
         -- ST_Covers keeps POI points that lie exactly on a SA2 boundary.
         -- If one POI matches multiple SA2 polygons, choose the first SA2 code.
         INSERT INTO {schema}.sa2_poi (sa2_code, poi_objectid, assign_method)
@@ -163,7 +161,8 @@ def assign_poi_to_sa2(engine: Engine, schema: str, assignment_method: str) -> No
         """
     )
     with engine.begin() as connection:
-        connection.execute(sql, {"assignment_method": assignment_method})
+        connection.execute(text(f"TRUNCATE TABLE {schema}.sa2_poi"))
+        connection.execute(insert_sql, {"assignment_method": assignment_method})
 
 
 def upsert_scores(engine: Engine, schema: str, records: list[dict[str, Any]]) -> None:
@@ -265,4 +264,3 @@ def insert_correlation_results(engine: Engine, schema: str, records: list[dict[s
     )
     with engine.begin() as connection:
         connection.execute(sql, records)
-
