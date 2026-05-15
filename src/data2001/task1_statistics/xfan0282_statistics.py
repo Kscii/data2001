@@ -73,11 +73,8 @@ def xfan0282_1(df: pd.DataFrame) -> StatisticResult:
         value=round(apartment_change, 2),
         unit="percentage points",
         description=(
-            f"Apartment share rose from {apartment_2011:.2f}% to {apartment_2021:.2f}% "
-            f"(+{apartment_change:.2f} percentage points), while separate house share "
-            f"changed from {separate_2011:.2f}% to {separate_2021:.2f}% "
-            f"({separate_change:.2f} percentage points). This sets up the housing "
-            "and daily-life pressure story."
+            f"Apartment share increased {apartment_change:.2f}pp to {apartment_2021:.2f}% (2011-2021), "
+            "indicating residential structure shift."
         ),
     )
 
@@ -93,9 +90,7 @@ def xfan0282_2(df: pd.DataFrame) -> StatisticResult:
         value=round(growth_ratio, 2),
         unit="times",
         description=(
-            f"Work-from-home share rose from {wfh_2016:.2f}% in 2016 to "
-            f"{wfh_2021:.2f}% in 2021, or about {growth_ratio:.2f} times higher. "
-            "This explains why the next statistic checks travel mode change."
+            f"Work-from-home share grew {growth_ratio:.2f}x from {wfh_2016:.2f}% to {wfh_2021:.2f}% (2016-2021)."
         ),
     )
 
@@ -111,10 +106,7 @@ def xfan0282_3(df: pd.DataFrame) -> StatisticResult:
         value=round(drop, 2),
         unit="percentage points",
         description=(
-            f"Public transport as at least one travel method fell from "
-            f"{public_transport_2016:.2f}% to {public_transport_2021:.2f}%, "
-            f"a drop of {drop:.2f} percentage points. This supports the idea "
-            "that 2021 travel behaviour was not normal."
+            f"Public transport commute share dropped {drop:.2f}pp from {public_transport_2016:.2f}% to {public_transport_2021:.2f}% (2016-2021)."
         ),
     )
 
@@ -142,12 +134,7 @@ def xfan0282_4(df: pd.DataFrame) -> StatisticResult:
         value=round(gap, 2),
         unit="km",
         description=(
-            f"In 2016, {longest_occupation} had the longest average commute "
-            f"({commute_by_occupation[longest_occupation]:.1f} km), while "
-            f"{shortest_occupation} had the shortest "
-            f"({commute_by_occupation[shortest_occupation]:.1f} km). "
-            f"The gap was {gap:.1f} km, showing that commute burden was uneven "
-            "even before the 2021 work-from-home shift."
+            f"Commute distance gap in 2016: {gap:.1f} km (range {commute_by_occupation[shortest_occupation]:.1f}-{commute_by_occupation[longest_occupation]:.1f} km across occupations)."
         ),
     )
 
@@ -163,11 +150,7 @@ def xfan0282_5(df: pd.DataFrame) -> StatisticResult:
         value=round(stress_ratio, 2),
         unit="times",
         description=(
-            f"In 2021, {rent_stress:.1f}% of renting households spent more than "
-            f"30% of income on rent, compared with {mortgage_stress:.1f}% for "
-            f"mortgage repayments. Rent stress was about {stress_ratio:.2f} "
-            "times mortgage stress, so housing pressure remained important even "
-            "when work and travel patterns changed."
+            f"Rent stress ({rent_stress:.1f}%) is {stress_ratio:.2f}x mortgage stress ({mortgage_stress:.1f}%) in 2021."
         ),
     )
 
