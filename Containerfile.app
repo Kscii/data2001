@@ -10,7 +10,7 @@ COPY src ./src
 RUN uv sync --frozen --no-dev
 
 ENV PATH="/app/.venv/bin:${PATH}"
-ENV DATA2001_CONFIG="/app/configs/example.yaml"
+ENV DATA2001_CONFIG="/app/configs/local.yaml"
 
 EXPOSE 8050
 

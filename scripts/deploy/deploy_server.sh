@@ -12,6 +12,7 @@ SYSTEMD_DIR="${HOME}/.config/containers/systemd"
 DATA2001_CONFIG_DIR="${HOME}/.config/data2001"
 APP_ENV_FILE="${DATA2001_CONFIG_DIR}/app.env"
 POSTGRES_ENV_FILE="${DATA2001_CONFIG_DIR}/postgres.env"
+APP_CONFIG_FILE="${DATA2001_CONFIG_DIR}/local.yaml"
 DEPLOY_USER="$(id -un)"
 PODMAN_PACKAGES=(
   podman
@@ -39,6 +40,19 @@ run_with_sudo() {
 
   echo "Missing required command and passwordless sudo is not available: $*" >&2
   echo "Install Podman on the server manually, or deploy with a SERVER_USER that can run sudo without a password." >&2
+  exit 1
+}
+
+require_file() {
+  local path="$1"
+  local example="$2"
+
+  if [[ -f "${path}" ]]; then
+    return
+  fi
+
+  echo "Missing required deployment config: ${path}" >&2
+  echo "Create it manually on the server before deploying. Template: ${example}" >&2
   exit 1
 }
 
@@ -126,19 +140,14 @@ enable_linger_if_possible
 
 mkdir -p "${SYSTEMD_DIR}" "${DATA2001_CONFIG_DIR}"
 
-if [[ ! -f "${APP_ENV_FILE}" ]]; then
-  cp "${REPO_ROOT}/containers/env/app.env.example" "${APP_ENV_FILE}"
-  echo "Created ${APP_ENV_FILE} from example. Review it before exposing the service publicly."
-fi
+require_file "${APP_ENV_FILE}" "${REPO_ROOT}/containers/env/app.env.example"
+require_file "${POSTGRES_ENV_FILE}" "${REPO_ROOT}/containers/env/postgres.env.example"
+require_file "${APP_CONFIG_FILE}" "${REPO_ROOT}/configs/example.yaml"
 
-if grep -qx "DATA2001_CONFIG=/app/configs/local.yaml" "${APP_ENV_FILE}"; then
-  sed -i "s#^DATA2001_CONFIG=/app/configs/local.yaml\$#DATA2001_CONFIG=/app/configs/example.yaml#" "${APP_ENV_FILE}"
-  echo "Updated ${APP_ENV_FILE} to use /app/configs/example.yaml, which is included in the app image."
-fi
-
-if [[ ! -f "${POSTGRES_ENV_FILE}" ]]; then
-  cp "${REPO_ROOT}/containers/env/postgres.env.example" "${POSTGRES_ENV_FILE}"
-  echo "Created ${POSTGRES_ENV_FILE} from example. Review the password before exposing the service publicly."
+if ! grep -qx "DATA2001_CONFIG=/app/configs/local.yaml" "${APP_ENV_FILE}"; then
+  echo "${APP_ENV_FILE} must include exactly: DATA2001_CONFIG=/app/configs/local.yaml" >&2
+  echo "The server file ${APP_CONFIG_FILE} is mounted there inside the app container." >&2
+  exit 1
 fi
 
 cp "${REPO_ROOT}/containers/quadlet/data2001.network" "${SYSTEMD_DIR}/data2001.network"
@@ -183,12 +192,14 @@ podman exec data2001-postgis pg_isready -U "${POSTGRES_USER:-data2001}" -d "${PO
 podman run --rm \
   --network data2001 \
   --env-file "${APP_ENV_FILE}" \
+  --volume "${APP_CONFIG_FILE}:/app/configs/local.yaml:ro,z" \
   "${IMAGE_REF}" \
   data2001 reset-db --yes
 
 podman run --rm \
   --network data2001 \
   --env-file "${APP_ENV_FILE}" \
+  --volume "${APP_CONFIG_FILE}:/app/configs/local.yaml:ro,z" \
   "${IMAGE_REF}" \
   data2001 run-workflow
 

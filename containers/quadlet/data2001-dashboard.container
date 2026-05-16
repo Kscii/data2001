@@ -9,6 +9,7 @@ ContainerName=data2001-dashboard
 Network=data2001.network
 PublishPort=127.0.0.1:8050:8050
 EnvironmentFile=%h/.config/data2001/app.env
+Volume=%h/.config/data2001/local.yaml:/app/configs/local.yaml:ro,z
 
 [Service]
 Restart=always
