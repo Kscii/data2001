@@ -21,11 +21,20 @@ from data2001.task2_import.boundaries.areas import selected_sa4_names
 # ── 可视化数据 ──────────────────────────────────────────────────────────────
 
 
-def load_sa2_scores(engine: Engine, settings: Settings) -> pd.DataFrame:
-    """读取带 SA2 geometry 的 score 数据, 仅限指定 SA4 范围."""
-    schema = settings.database.schema_name
+def _sa4_filter_sql(settings: Settings, *, table_alias: str = "area") -> str:
+    """Return an SA4 filter for selected-SA4 visuals, or no filter for Greater Sydney."""
+    if settings.task3_score.score_universe != "selected_sa4":
+        return ""
+
     sa4_names = selected_sa4_names(settings)
     sa4_list = ", ".join(f"'{name.replace(chr(39), chr(39)*2)}'" for name in sa4_names)
+    return f"AND {table_alias}.sa4_name IN ({sa4_list})"
+
+
+def load_sa2_scores(engine: Engine, settings: Settings) -> pd.DataFrame:
+    """读取当前 score_universe 范围内带 SA2 geometry 的 score 数据."""
+    schema = settings.database.schema_name
+    sa4_filter = _sa4_filter_sql(settings)
     sql = text(
         f"""
         SELECT
@@ -46,7 +55,7 @@ def load_sa2_scores(engine: Engine, settings: Settings) -> pd.DataFrame:
           ON area.sa2_code = s.sa2_code
         WHERE s.score_version = :score_version
           AND s.score_universe = :score_universe
-          AND area.sa4_name IN ({sa4_list})
+          {sa4_filter}
         ORDER BY area.sa4_name, area.sa2_name
         """
     )
@@ -63,10 +72,9 @@ def load_sa2_scores(engine: Engine, settings: Settings) -> pd.DataFrame:
 
 
 def load_poi_group_counts(engine: Engine, settings: Settings) -> pd.DataFrame:
-    """按 POI group 聚合 POI 数量, 仅限指定 SA4 范围."""
+    """按当前 score_universe 范围内的 POI group 聚合 POI 数量."""
     schema = settings.database.schema_name
-    sa4_names = selected_sa4_names(settings)
-    sa4_list = ", ".join(f"'{name.replace(chr(39), chr(39)*2)}'" for name in sa4_names)
+    sa4_filter = _sa4_filter_sql(settings)
     sql = text(
         f"""
         SELECT
@@ -78,7 +86,8 @@ def load_poi_group_counts(engine: Engine, settings: Settings) -> pd.DataFrame:
           ON assigned.poi_objectid = p.objectid
         LEFT JOIN {schema}.sa2 area
           ON area.sa2_code = assigned.sa2_code
-        WHERE area.sa4_name IN ({sa4_list})
+        WHERE area.sa4_name IS NOT NULL
+          {sa4_filter}
         GROUP BY p.poigroup_name, p.poigroup_code
         ORDER BY poi_count DESC, poigroup_name
         """
@@ -93,11 +102,10 @@ def load_poi_points(
     *,
     limit: int | None = None,
 ) -> pd.DataFrame:
-    """读取 POI 点位及其 SA2/SA4 归属信息, 仅限指定 SA4 范围."""
+    """读取当前 score_universe 范围内的 POI 点位及其 SA2/SA4 归属信息."""
     schema = settings.database.schema_name
     limit_clause = "LIMIT :limit" if limit is not None else ""
-    sa4_names = selected_sa4_names(settings)
-    sa4_list = ", ".join(f"'{name.replace(chr(39), chr(39)*2)}'" for name in sa4_names)
+    sa4_filter = _sa4_filter_sql(settings)
     sql = text(
         f"""
         SELECT
@@ -119,7 +127,8 @@ def load_poi_points(
           ON area.sa2_code = assigned.sa2_code
         WHERE poi.longitude IS NOT NULL
           AND poi.latitude IS NOT NULL
-          AND area.sa4_name IN ({sa4_list})
+          AND area.sa4_name IS NOT NULL
+          {sa4_filter}
         ORDER BY poi.objectid
         {limit_clause}
         """
@@ -130,10 +139,9 @@ def load_poi_points(
 
 
 def load_score_income(engine: Engine, settings: Settings) -> pd.DataFrame:
-    """读取 score 与 median income 已 join 的数据, 仅限指定 SA4 范围."""
+    """读取当前 score_universe 范围内 score 与 median income 已 join 的数据."""
     schema = settings.database.schema_name
-    sa4_names = selected_sa4_names(settings)
-    sa4_list = ", ".join(f"'{name.replace(chr(39), chr(39)*2)}'" for name in sa4_names)
+    sa4_filter = _sa4_filter_sql(settings)
     sql = text(
         f"""
         SELECT
@@ -152,7 +160,7 @@ def load_score_income(engine: Engine, settings: Settings) -> pd.DataFrame:
           ON income.sa2_code = score.sa2_code
         WHERE score.score_version = :score_version
           AND score.score_universe = :score_universe
-          AND area.sa4_name IN ({sa4_list})
+          {sa4_filter}
         ORDER BY area.sa4_name, area.sa2_name
         """
     )
