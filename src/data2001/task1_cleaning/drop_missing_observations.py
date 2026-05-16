@@ -9,7 +9,7 @@ def drop_missing_observations(df: pd.DataFrame) -> pd.DataFrame:
 
     before_rows = len(df)
 
-    df = df.dropna(subset=["value"])
+    df = df.dropna(subset=["value"]).reset_index(drop=True)
 
     after_rows = len(df)
 
