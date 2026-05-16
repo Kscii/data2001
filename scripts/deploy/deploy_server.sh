@@ -158,7 +158,7 @@ fi
 
 podman pull "${IMAGE_REF}"
 
-systemctl --user enable --now data2001-postgis.service
+systemctl --user start data2001-postgis.service
 
 set -a
 # shellcheck disable=SC1090
@@ -187,7 +187,6 @@ podman run --rm \
   "${IMAGE_REF}" \
   data2001 run-workflow
 
-systemctl --user enable --now data2001-dashboard.service
 systemctl --user restart data2001-dashboard.service
 
 echo "Deployment completed with image ${IMAGE_REF}"
