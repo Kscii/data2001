@@ -5,6 +5,11 @@
 ![postgresql](https://img.shields.io/badge/postgresql%20%2B%20postgis-enabled-blue)
 ![dashboard](https://img.shields.io/badge/visual-dashboard-purple)
 
+## project links
+
+- Dashboard: https://kscii.tech
+- Repository: https://github.sydney.edu.au/xfan0282/data2001-group-assignment
+
 ## 项目依赖
 
 使用本项目之前, 请确保电脑上有这些工具:
@@ -143,6 +148,12 @@ uv run plotly_get_chrome
 # 本地启动visual dashboard服务器
 uv run data2001 dashboard
 # 然后浏览器打开终端中显示的端口
+```
+
+部署后的 dashboard 地址:
+
+```text
+https://kscii.tech
 ```
 
 ## 常用命令
