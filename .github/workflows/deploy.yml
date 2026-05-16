@@ -67,7 +67,7 @@ jobs:
       - name: Upload deployment files
         if: ${{ github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main' }}
         run: |
-          tar czf /tmp/data2001-deploy.tgz configs/example.yaml containers/quadlet containers/env scripts/deploy/deploy_server.sh
+          tar czf /tmp/data2001-deploy.tgz configs/example.yaml containers/quadlet containers/env scripts/deploy/deploy_server.sh scripts/deploy/setup_nginx_https.sh
           scp /tmp/data2001-deploy.tgz "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/tmp/data2001-deploy.tgz"
 
       - name: Deploy on server
