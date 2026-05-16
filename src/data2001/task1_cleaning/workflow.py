@@ -7,6 +7,7 @@ from data2001.task1_cleaning.clean_missing_values import clean_missing_values
 from data2001.task1_cleaning.convert_numeric_columns import convert_numeric_columns
 from data2001.task1_cleaning.extract_unit_column import extract_unit_column
 from data2001.task1_cleaning.reshape_wide_to_long import reshape_wide_to_long
+from data2001.task1_cleaning.drop_missing_observations import drop_missing_observations
 from data2001.task1_cleaning.validate_and_flag_outliers import (
     validate_and_flag_outliers,
 )
@@ -18,6 +19,7 @@ CLEANING_STEPS = [
     clean_missing_values,
     convert_numeric_columns,
     reshape_wide_to_long,
+    drop_missing_observations,
     validate_and_flag_outliers,
 ]
 
