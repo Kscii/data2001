@@ -12,6 +12,73 @@ SYSTEMD_DIR="${HOME}/.config/containers/systemd"
 DATA2001_CONFIG_DIR="${HOME}/.config/data2001"
 APP_ENV_FILE="${DATA2001_CONFIG_DIR}/app.env"
 POSTGRES_ENV_FILE="${DATA2001_CONFIG_DIR}/postgres.env"
+DEPLOY_USER="$(id -un)"
+
+command_exists() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+run_with_sudo() {
+  if [[ "${EUID}" -eq 0 ]]; then
+    "$@"
+    return
+  fi
+
+  if command_exists sudo && sudo -n true 2>/dev/null; then
+    sudo "$@"
+    return
+  fi
+
+  echo "Missing required command and passwordless sudo is not available: $*" >&2
+  echo "Install Podman on the server manually, or deploy with a SERVER_USER that can run sudo without a password." >&2
+  exit 1
+}
+
+install_podman_if_missing() {
+  if command_exists podman; then
+    return
+  fi
+
+  if [[ -f /etc/debian_version ]] && command_exists apt-get; then
+    echo "Podman is not installed. Installing podman with apt-get..."
+    run_with_sudo apt-get update
+    run_with_sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y \
+      podman \
+      uidmap \
+      dbus-user-session \
+      slirp4netns \
+      fuse-overlayfs
+    return
+  fi
+
+  echo "Podman is not installed and this script only auto-installs it on Debian/Ubuntu hosts." >&2
+  echo "Install Podman on the server, then rerun the deployment." >&2
+  exit 1
+}
+
+enable_linger_if_possible() {
+  if ! command_exists loginctl; then
+    return
+  fi
+
+  if loginctl show-user "${DEPLOY_USER}" >/dev/null 2>&1; then
+    if loginctl show-user "${DEPLOY_USER}" -p Linger --value 2>/dev/null | grep -qx yes; then
+      return
+    fi
+  fi
+
+  if [[ "${EUID}" -ne 0 ]] && (! command_exists sudo || ! sudo -n true 2>/dev/null); then
+    echo "Warning: passwordless sudo is not available; skipping loginctl enable-linger ${DEPLOY_USER}." >&2
+    echo "Run it manually if dashboard services stop after SSH exits." >&2
+    return
+  fi
+
+  echo "Enabling lingering for ${DEPLOY_USER} so user services keep running after SSH exits..."
+  run_with_sudo loginctl enable-linger "${DEPLOY_USER}"
+}
+
+install_podman_if_missing
+enable_linger_if_possible
 
 mkdir -p "${SYSTEMD_DIR}" "${DATA2001_CONFIG_DIR}"
 
