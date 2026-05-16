@@ -131,6 +131,11 @@ if [[ ! -f "${APP_ENV_FILE}" ]]; then
   echo "Created ${APP_ENV_FILE} from example. Review it before exposing the service publicly."
 fi
 
+if grep -qx "DATA2001_CONFIG=/app/configs/local.yaml" "${APP_ENV_FILE}"; then
+  sed -i "s#^DATA2001_CONFIG=/app/configs/local.yaml\$#DATA2001_CONFIG=/app/configs/example.yaml#" "${APP_ENV_FILE}"
+  echo "Updated ${APP_ENV_FILE} to use /app/configs/example.yaml, which is included in the app image."
+fi
+
 if [[ ! -f "${POSTGRES_ENV_FILE}" ]]; then
   cp "${REPO_ROOT}/containers/env/postgres.env.example" "${POSTGRES_ENV_FILE}"
   echo "Created ${POSTGRES_ENV_FILE} from example. Review the password before exposing the service publicly."
