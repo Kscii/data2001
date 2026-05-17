@@ -34,15 +34,18 @@ def longest_streak(values, direction="increase"):
     return best
 
 
-#Statistic 1
-#Population growth rate
-
 def dabi0142_1(df: pd.DataFrame) -> StatisticResult:
+    population = find_indicator(df, "Estimated resident population")
 
-    population = find_indicator(
-        df,
-        "Estimated resident population.*no"
-    )
+    if population.empty:
+        return StatisticResult(
+            member="dabi0142",
+            statistic_id="dabi0142_1",
+            title="Population growth rate",
+            value=None,
+            unit="%",
+            description="Population data was not found."
+        )
 
     start_row = population.iloc[0]
     end_row = population.iloc[-1]
@@ -53,57 +56,65 @@ def dabi0142_1(df: pd.DataFrame) -> StatisticResult:
     ) * 100
 
     return StatisticResult(
-        statistic="Population growth rate",
+        member="dabi0142",
+        statistic_id="dabi0142_1",
+        title="Population growth rate",
         value=round(growth_rate, 2),
+        unit="%",
         description=(
-            f"NSW estimated resident population increased "
-            f"by {growth_rate:.2f}% from "
-            f"{int(start_row['year'])} to "
+            f"The estimated resident population in NSW grew "
+            f"by around {growth_rate:.2f}% between "
+            f"{int(start_row['year'])} and "
             f"{int(end_row['year'])}."
         )
     )
 
 
-#Statistic 2
-#Latest working-age population percentage
-
 def dabi0142_2(df: pd.DataFrame) -> StatisticResult:
+    working_age = find_indicator(df, "Working age population")
 
-    working_age = find_indicator(
-        df,
-        "Working age population.*%"
-    )
+    if working_age.empty:
+        return StatisticResult(
+            member="dabi0142",
+            statistic_id="dabi0142_2",
+            title="Working-age population percentage",
+            value=None,
+            unit="%",
+            description="Working-age population data was not found."
+        )
 
     latest_row = working_age.iloc[-1]
 
     return StatisticResult(
-        statistic="Latest working-age population percentage",
+        member="dabi0142",
+        statistic_id="dabi0142_2",
+        title="Working-age population percentage",
         value=round(latest_row["value"], 2),
+        unit="%",
         description=(
-            f"In {int(latest_row['year'])}, "
-            f"{latest_row['value']:.2f}% of the NSW population "
-            f"was aged 15 to 64."
+            f"The latest available data shows that "
+            f"about {latest_row['value']:.2f}% of people in NSW "
+            f"were in the working-age population "
+            f"({int(latest_row['year'])})."
         )
     )
 
 
-#Statistic 3
-#Largest year-to-year unemployment rate change
-
 def dabi0142_3(df: pd.DataFrame) -> StatisticResult:
+    unemployment = find_indicator(df, "Unemployment rate")
 
-    unemployment = find_indicator(
-        df,
-        "Unemployment rate"
-    )
+    if unemployment.empty:
+        return StatisticResult(
+            member="dabi0142",
+            statistic_id="dabi0142_3",
+            title="Largest unemployment rate change",
+            value=None,
+            unit="percentage points",
+            description="Unemployment data was not found."
+        )
 
-    unemployment["annual_change"] = (
-        unemployment["value"].diff()
-    )
-
-    unemployment["abs_annual_change"] = (
-        unemployment["annual_change"].abs()
-    )
+    unemployment["annual_change"] = unemployment["value"].diff()
+    unemployment["abs_annual_change"] = unemployment["annual_change"].abs()
 
     max_change_row = unemployment.loc[
         unemployment["abs_annual_change"].idxmax()
@@ -112,22 +123,21 @@ def dabi0142_3(df: pd.DataFrame) -> StatisticResult:
     previous_year = int(max_change_row["year"] - 1)
 
     return StatisticResult(
-        statistic="Largest unemployment rate change",
+        member="dabi0142",
+        statistic_id="dabi0142_3",
+        title="Largest unemployment rate change",
         value=round(max_change_row["annual_change"], 2),
+        unit="percentage points",
         description=(
-            f"The largest annual unemployment rate change "
-            f"was {max_change_row['annual_change']:.2f} percentage "
-            f"points between {previous_year} and "
-            f"{int(max_change_row['year'])}."
+            f"The biggest change in unemployment rate happened "
+            f"between {previous_year} and "
+            f"{int(max_change_row['year'])}, changing by "
+            f"{max_change_row['annual_change']:.2f} percentage points."
         )
     )
 
 
-#Statistic 4
-#Most volatile indicator
-
 def dabi0142_4(df: pd.DataFrame) -> StatisticResult:
-
     volatility = (
         df
         .groupby("description")["value"]
@@ -136,39 +146,42 @@ def dabi0142_4(df: pd.DataFrame) -> StatisticResult:
         .sort_values(ascending=False)
     )
 
+    if volatility.empty:
+        return StatisticResult(
+            member="dabi0142",
+            statistic_id="dabi0142_4",
+            title="Most volatile indicator",
+            value=None,
+            unit="std",
+            description="No valid volatility result was found."
+        )
+
     most_volatile_indicator = volatility.index[0]
     most_volatile_value = volatility.iloc[0]
 
     return StatisticResult(
-        statistic="Most volatile indicator",
+        member="dabi0142",
+        statistic_id="dabi0142_4",
+        title="Most volatile indicator",
         value=round(most_volatile_value, 2),
+        unit="std",
         description=(
-            f"The most volatile indicator was "
-            f"'{most_volatile_indicator}', with a standard "
-            f"deviation of {most_volatile_value:.2f}."
+            f"'{most_volatile_indicator}' showed the largest "
+            f"variation across years, with a standard deviation "
+            f"of {most_volatile_value:.2f}."
         )
     )
 
 
-#Statistic 5
-#Longest continuous increase streak
-
 def dabi0142_5(df: pd.DataFrame) -> StatisticResult:
-
     streak_records = []
 
     for indicator, group in df.groupby("description"):
-
         group = group.sort_values("year")
-
         values = group["value"].tolist()
 
         if len(values) >= 3:
-
-            streak = longest_streak(
-                values,
-                direction="increase"
-            )
+            streak = longest_streak(values, direction="increase")
 
             streak_records.append({
                 "indicator": indicator,
@@ -177,6 +190,16 @@ def dabi0142_5(df: pd.DataFrame) -> StatisticResult:
 
     streak_df = pd.DataFrame(streak_records)
 
+    if streak_df.empty:
+        return StatisticResult(
+            member="dabi0142",
+            statistic_id="dabi0142_5",
+            title="Longest increase streak",
+            value=None,
+            unit="years",
+            description="No valid streak result was found."
+        )
+
     best_streak = (
         streak_df
         .sort_values("streak", ascending=False)
@@ -184,13 +207,15 @@ def dabi0142_5(df: pd.DataFrame) -> StatisticResult:
     )
 
     return StatisticResult(
-        statistic="Longest increase streak",
+        member="dabi0142",
+        statistic_id="dabi0142_5",
+        title="Longest increase streak",
         value=int(best_streak["streak"]),
+        unit="years",
         description=(
-            f"The indicator '{best_streak['indicator']}' "
-            f"had the longest continuous increase streak "
-            f"with {int(best_streak['streak'])} consecutive "
-            f"year-to-year increases."
+            f"'{best_streak['indicator']}' recorded the longest "
+            f"continuous upward trend, with "
+            f"{int(best_streak['streak'])} consecutive yearly increases."
         )
     )
 
@@ -204,10 +229,7 @@ STATISTICS = [
 ]
 
 
-def get_dabi0142_statistics(
-    df: pd.DataFrame
-) -> list[StatisticResult]:
-
+def get_dabi0142_statistics(df: pd.DataFrame) -> list[StatisticResult]:
     return [
         statistic(df)
         for statistic in STATISTICS
