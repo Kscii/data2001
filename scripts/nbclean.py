@@ -2,8 +2,9 @@
 """Strip notebook outputs and reset execution counts.
 
 Usage:
-    uv run python scripts/nbclean.py              # clean all notebooks
+    uv run python scripts/nbclean.py              # clean all notebooks under notebooks/
     uv run python scripts/nbclean.py notebooks/full_workflow.ipynb
+    uv run python scripts/nbclean.py notebooks/xfan0282
 """
 from __future__ import annotations
 
@@ -50,11 +51,33 @@ def clean_notebook(path: Path) -> bool:
     return changed
 
 
+def resolve_targets(args: list[str]) -> list[Path]:
+    """Resolve CLI arguments into notebook files.
+
+    With no arguments, only notebooks under notebooks/ are cleaned. File arguments
+    clean that single notebook; directory arguments clean notebooks recursively.
+    """
+    if not args:
+        return sorted(NOTEBOOKS_DIR.rglob("*.ipynb"))
+
+    targets: list[Path] = []
+    for arg in args:
+        path = Path(arg)
+        if not path.is_absolute():
+            path = PROJECT_ROOT / path
+
+        if path.is_dir():
+            targets.extend(sorted(path.rglob("*.ipynb")))
+        elif path.suffix == ".ipynb":
+            targets.append(path)
+        else:
+            raise ValueError(f"target is not a notebook or directory: {path}")
+
+    return sorted(dict.fromkeys(targets))
+
+
 def main() -> None:
-    if len(sys.argv) > 1:
-        targets = [Path(arg) for arg in sys.argv[1:]]
-    else:
-        targets = sorted(PROJECT_ROOT.rglob("*.ipynb"))
+    targets = resolve_targets(sys.argv[1:])
 
     if not targets:
         print("no notebooks found")

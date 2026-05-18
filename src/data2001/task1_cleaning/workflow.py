@@ -18,9 +18,9 @@ CLEANING_STEPS = [
     extract_unit_column, # xfan0282
     clean_missing_values,
     convert_numeric_columns,
+    validate_and_flag_outliers,
     reshape_wide_to_long,
     drop_missing_observations,
-    validate_and_flag_outliers,
 ]
 
 def run_task1_cleaning(input_csv_path: str, output_csv_path: str | None = None) -> pd.DataFrame:
