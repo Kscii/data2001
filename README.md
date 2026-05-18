@@ -212,6 +212,12 @@ task4/              notebook/report/dashboard shared charts (Task 4)
 db/repositories/    database admin/read/write repository modules
 ```
 
+## Documentation
+
+- [API Reference](docs/api_reference.md): API endpoints, expected fields, field mappings, and persisted workflow files.
+- [Architecture Design](docs/architecture_design.md): project structure, configuration flow, workflow steps, module boundaries, and call-chain diagrams.
+- [Database Reference](docs/database_reference.md): database tables, keys, indexes, ERD, and spatial join design.
+
 ## 配置说明
 
 默认配置路径:
@@ -241,8 +247,8 @@ configs/example.yaml
 - raw api files: `data/raw/poi_api/responses/`和`data/raw/poi_api/features.jsonl`. (task2 / api extraction)
 - database tables: `sa2`, `sa4`, `poi_clean`, `sa2_poi`, `sa2_score`, `sa2_income`, `score_income_correlation`. (database schema / spatial join / score calculation)
 - report figures: `report/figures/*.png`. (task4 / data visualisations)
-- notebook workflow: `notebooks/full_workflow.ipynb`. (task1-4 explanation)
-- final report draft: `report/final_report.md`. (task4 / results analysis)
+- notebook workflow: `notebooks/full_workflow.ipynb` and member notebooks under `notebooks/<unikey>/`. (task1-4 explanation)
+- final report draft: `report/report.md`. (task4 / results analysis)
 
 ## 贡献方式
 
