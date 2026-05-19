@@ -127,8 +127,8 @@ Bbox extraction only returns candidate POIs because a rectangular bbox can inclu
 
 | Evidence item | Value |
 | --- | --- |
-| Response files | 108 |
-| Raw feature rows | 15209 |
+| Response files | 106 |
+| Raw feature rows | 16468 |
 | Clean POI rows | TODO |
 | Assigned POI rows | TODO |
 | Unassigned POI rows | TODO |
