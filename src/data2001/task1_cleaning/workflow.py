@@ -11,11 +11,13 @@ from data2001.task1_cleaning.drop_missing_observations import drop_missing_obser
 from data2001.task1_cleaning.validate_and_flag_outliers import (
     validate_and_flag_outliers,
 )
+from data2001.task1_cleaning.standardise_text_columns import standardise_text_columns
 
 
 CLEANING_STEPS = [
     clean_column_names,
-    extract_unit_column, # xfan0282
+    standardise_text_columns,  # jzho0172
+    extract_unit_column,  # xfan0282
     clean_missing_values,
     convert_numeric_columns,
     validate_and_flag_outliers,
