@@ -71,7 +71,7 @@ All selected SA4 areas are within Greater Sydney. The current configuration uses
 
 The Task 1 cleaning workflow is shown in `full_workflow.ipynb`, Section 2: Task 1 CSV Loading, Cleaning, and Derived Statistics. The raw CSV is cleaned once and then reused as the common input for each member's derived statistics.
 
-The implemented cleaning steps standardise column names, extract unit information, handle missing values and duplicate rows, convert year columns into numeric values, detect outliers, reshape the dataset into long format, and remove rows with missing observations.
+The implemented cleaning steps standardise column names, standardise text columns, extract unit information, handle missing values and duplicate rows, convert year columns into numeric values, detect outliers, reshape the dataset into long format, and remove rows with missing observations.
 
 Each member's complete five derived statistics are provided in `task1_statistics.ipynb`, Section: Individual Derived Statistics. The report should only highlight selected findings that support the group-level analysis.
 

@@ -64,6 +64,7 @@ def register_dashboard_callbacks(app: Dash, engine: Engine, settings: Settings) 
         n = max(int(top_n or settings.dashboard.default_top_n), 1)
         try:
             scores = load_sa2_scores(engine, settings)
+            score_map_areas = load_sa2_scores(engine, settings, include_excluded=True)
             poi = load_poi_points(engine, settings, limit=settings.dashboard.poi_limit)
             score_income = load_score_income(engine, settings)
             correlation = load_correlation_results(engine, settings)
@@ -72,6 +73,7 @@ def register_dashboard_callbacks(app: Dash, engine: Engine, settings: Settings) 
             return message, kpi_cards(pd.DataFrame(), pd.DataFrame(), pd.DataFrame())
 
         scores = filter_common(scores, sa4_names=sa4_names, sa2_codes=sa2_codes)
+        score_map_areas = filter_common(score_map_areas, sa4_names=sa4_names, sa2_codes=sa2_codes)
         poi = filter_poi(poi, sa4_names=sa4_names, sa2_codes=sa2_codes, poi_groups=poi_groups)
         score_income = filter_common(score_income, sa4_names=sa4_names, sa2_codes=sa2_codes)
         kpis = kpi_cards(scores, poi, score_income)
@@ -93,13 +95,13 @@ def register_dashboard_callbacks(app: Dash, engine: Engine, settings: Settings) 
             else empty_figure("SA2 score distribution by SA4")
         )
         score_map = (
-            build_score_choropleth_map(scores)
-            if not scores.empty
+            build_score_choropleth_map(score_map_areas)
+            if not score_map_areas.empty
             else empty_figure("SA2 well-resourced score map")
         )
         poi_density_map = (
-            build_poi_density_choropleth_map(scores)
-            if not scores.empty
+            build_poi_density_choropleth_map(score_map_areas)
+            if not score_map_areas.empty
             else empty_figure("Population-adjusted POI density by SA2")
         )
         poi_map = (
