@@ -31,34 +31,91 @@ def _sa4_filter_sql(settings: Settings, *, table_alias: str = "area") -> str:
     return f"AND {table_alias}.sa4_name IN ({sa4_list})"
 
 
-def load_sa2_scores(engine: Engine, settings: Settings) -> pd.DataFrame:
-    """读取当前 score_universe 范围内带 SA2 geometry 的 score 数据."""
+def load_sa2_scores(
+    engine: Engine,
+    settings: Settings,
+    *,
+    include_excluded: bool = False,
+) -> pd.DataFrame:
+    """读取当前 score_universe 范围内带 SA2 geometry 的 score 数据.
+
+    When ``include_excluded`` is true, return all SA2 areas in the configured
+    map scope and mark areas that were excluded from scoring, so maps can draw
+    them as a neutral background layer without changing score calculations.
+    """
     schema = settings.database.schema_name
     sa4_filter = _sa4_filter_sql(settings)
-    sql = text(
-        f"""
-        SELECT
-            s.sa2_code,
-            area.sa2_name,
-            area.sa4_code,
-            area.sa4_name,
-            area.population,
-            s.poi_count,
-            s.mean_poi_count,
-            s.std_poi_count,
-            s.z_poi,
-            s.score_raw,
-            s.score_100,
-            ST_AsGeoJSON(area.geometry)::json AS geometry
-        FROM {schema}.sa2_score s
-        JOIN {schema}.sa2 area
-          ON area.sa2_code = s.sa2_code
-        WHERE s.score_version = :score_version
-          AND s.score_universe = :score_universe
-          {sa4_filter}
-        ORDER BY area.sa4_name, area.sa2_name
-        """
-    )
+    if include_excluded:
+        sql = text(
+            f"""
+            SELECT
+                area.sa2_code,
+                area.sa2_name,
+                area.sa4_code,
+                area.sa4_name,
+                area.population,
+                COALESCE(s.poi_count, assigned_poi.poi_count, 0) AS poi_count,
+                s.mean_poi_count,
+                s.std_poi_count,
+                s.z_poi,
+                s.score_raw,
+                s.score_100,
+                (s.sa2_code IS NULL) AS is_excluded,
+                CASE
+                    WHEN s.sa2_code IS NOT NULL THEN NULL
+                    WHEN area.population IS NOT NULL
+                     AND area.population < :min_population
+                        THEN 'Excluded from score: population below minimum threshold'
+                    ELSE 'Excluded from score'
+                END AS exclusion_reason,
+                ST_AsGeoJSON(
+                    ST_Multi(ST_CollectionExtract(ST_MakeValid(area.geometry), 3))
+                )::json AS geometry
+            FROM {schema}.sa2 area
+            LEFT JOIN {schema}.sa2_score s
+              ON s.sa2_code = area.sa2_code
+             AND s.score_version = :score_version
+             AND s.score_universe = :score_universe
+            LEFT JOIN (
+                SELECT sa2_code, COUNT(*)::integer AS poi_count
+                FROM {schema}.sa2_poi
+                GROUP BY sa2_code
+            ) assigned_poi
+              ON assigned_poi.sa2_code = area.sa2_code
+            WHERE 1 = 1
+              {sa4_filter}
+            ORDER BY area.sa4_name, area.sa2_name
+            """
+        )
+    else:
+        sql = text(
+            f"""
+            SELECT
+                area.sa2_code,
+                area.sa2_name,
+                area.sa4_code,
+                area.sa4_name,
+                area.population,
+                s.poi_count,
+                s.mean_poi_count,
+                s.std_poi_count,
+                s.z_poi,
+                s.score_raw,
+                s.score_100,
+                false AS is_excluded,
+                NULL AS exclusion_reason,
+                ST_AsGeoJSON(
+                    ST_Multi(ST_CollectionExtract(ST_MakeValid(area.geometry), 3))
+                )::json AS geometry
+            FROM {schema}.sa2_score s
+            JOIN {schema}.sa2 area
+              ON area.sa2_code = s.sa2_code
+            WHERE s.score_version = :score_version
+              AND s.score_universe = :score_universe
+              {sa4_filter}
+            ORDER BY area.sa4_name, area.sa2_name
+            """
+        )
     with engine.connect() as connection:
         return pd.DataFrame(
             connection.execute(
@@ -66,6 +123,7 @@ def load_sa2_scores(engine: Engine, settings: Settings) -> pd.DataFrame:
                 {
                     "score_version": settings.task3_score.score_version,
                     "score_universe": settings.task3_score.score_universe,
+                    "min_population": settings.task3_score.min_population,
                 },
             ).mappings().all()
         )
