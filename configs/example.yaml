@@ -16,9 +16,9 @@ task2_import:
   gccsa_name: Greater Sydney
   selected_sa4_by_member:
     xfan0282: Sydney - City and Inner South
-    dabi0142: Sydney - South West Sydney
+    dabi0142: Sydney - Parramatta
     jzho0172: Sydney - North Sydney and Hornsby
-    xuyu8020: Sydney - Eastern Suburbs
+    xuyu8020: Sydney - Northern Beaches
   sa4_codes: []
   clean_batch_size: 1000
 

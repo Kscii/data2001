@@ -32,6 +32,7 @@ from data2001.task4.dashboard.helpers import (
     table_records,
 )
 from data2001.task4.maps import (
+    build_poi_density_choropleth_map,
     build_poi_point_scatter_map,
     build_score_choropleth_map,
 )
@@ -96,6 +97,11 @@ def register_dashboard_callbacks(app: Dash, engine: Engine, settings: Settings) 
             if not scores.empty
             else empty_figure("SA2 well-resourced score map")
         )
+        poi_density_map = (
+            build_poi_density_choropleth_map(scores)
+            if not scores.empty
+            else empty_figure("Population-adjusted POI density by SA2")
+        )
         poi_map = (
             build_poi_point_scatter_map(poi)
             if not poi.empty
@@ -138,7 +144,12 @@ def register_dashboard_callbacks(app: Dash, engine: Engine, settings: Settings) 
                 ]
             )
         elif tab == "score-map":
-            content = html.Div(Graph(figure=score_map, className="map-graph"), className="panel")
+            content = html.Div(
+                [
+                    html.Div(Graph(figure=score_map, className="map-graph"), className="panel"),
+                    html.Div(Graph(figure=poi_density_map, className="map-graph"), className="panel"),
+                ]
+            )
         elif tab == "poi-map":
             content = html.Div(
                 [
