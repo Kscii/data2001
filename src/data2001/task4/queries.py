@@ -412,9 +412,11 @@ def expected_report_figure_paths(settings: Settings) -> pd.DataFrame:
         "score_histogram.png",
         "top_sa2_score.png",
         "bottom_sa2_score.png",
+        "sa4_score_boxplot.png",
         "poi_group_distribution.png",
         "score_income_correlation.png",
         "sa2_score_choropleth.png",
+        "poi_density_choropleth.png",
         "poi_point_scatter.png",
     ]
     rows = []
