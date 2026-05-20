@@ -45,6 +45,7 @@ def export_report_charts(engine: Engine, settings: Settings) -> dict[str, Path]:
     """查询数据库并生成 report 需要的所有 PNG 图表."""
     charts_dir = resolve_project_path(settings.outputs.charts_dir)
     scores = load_sa2_scores(engine, settings)
+    score_map_areas = load_sa2_scores(engine, settings, include_excluded=True)
     group_counts = load_poi_group_counts(engine, settings)
     score_income = load_score_income(engine, settings)
     poi_points = load_poi_points(engine, settings)
@@ -56,8 +57,8 @@ def export_report_charts(engine: Engine, settings: Settings) -> dict[str, Path]:
         "sa4_score_boxplot.png": build_sa4_score_boxplot(scores),
         "poi_group_distribution.png": build_poi_group_distribution(group_counts),
         "score_income_correlation.png": build_score_income_scatter(score_income),
-        "sa2_score_choropleth.png": build_score_choropleth_map(scores),
-        "poi_density_choropleth.png": build_poi_density_choropleth_map(scores),
+        "sa2_score_choropleth.png": build_score_choropleth_map(score_map_areas),
+        "poi_density_choropleth.png": build_poi_density_choropleth_map(score_map_areas),
         "poi_point_scatter.png": build_poi_point_scatter_map(poi_points),
     }
     output_paths: dict[str, Path] = {}
