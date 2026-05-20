@@ -10,23 +10,6 @@ After the cleaning stage, POI data from categories such as recreation, transport
 
 Different visualisations were produced during the analysis process, including score maps, POI distribution maps, ranking charts, and comparisons between well-resourced scores and median income levels. These visualisations helped show how accessibility and resource concentration varied between different parts of Sydney.
 
-## Evidence Map
-
-| Rubric area | Primary evidence | Report coverage |
-| --- | --- | --- |
-| Data Import | `full_workflow.ipynb`, Section 3: Data Source Summary; Section 5: Task 2 API Extraction and Crawl Plan | Dataset summary and extraction evidence pointers. |
-| Database Schema | `full_workflow.ipynb`, Section 4: Database Schema and Indexes; `database_reference.md`, Section: Dictionary | ERD, table roles, geometry, and index summary. |
-| Spatial Join | `full_workflow.ipynb`, Section 6: Spatial Join Evidence; `task2_task3_analysis.ipynb`, Section: Task 2 Evidence | `ST_Covers` explanation and assignment summary table placeholder. |
-| API Extraction | `full_workflow.ipynb`, Section 5: Task 2 API Extraction and Crawl Plan; `api_reference.md`, Section: Design Notes | API workflow summary and extraction summary table placeholder. |
-| Score Calculation | `full_workflow.ipynb`, Section 7: Task 3 Score Calculation | Score formula, score universe, population filter, and rationale. |
-| Indexing | `full_workflow.ipynb`, Section 4: Database Schema and Indexes; `database_reference.md`, Section: Dictionary | Short index design summary. |
-| Dataset Description | `full_workflow.ipynb`, Section 3: Data Source Summary; `api_reference.md`, Section: Dictionary | Concise dataset table. |
-| Database Description | `report.md`, Section: Database Schema and Indexing; `database_reference.md`, Section: Dictionary | ERD and compact schema table. |
-| Results Analysis | `full_workflow.ipynb`, Section 8: Results Analysis; `task2_task3_analysis.ipynb`, Section: Individual Visual Analysis | Report-level figure interpretation placeholders. |
-| Correlation Analysis | `full_workflow.ipynb`, Section 9: Correlation Analysis | Pearson/Spearman result table and interpretation placeholders. |
-| Data Visualisations | `full_workflow.ipynb`, Section 10: Report Figures | All generated report figures are included below. |
-| Report Quality | `report.md`, Section: Full report | Concise report structure with technical details linked to notebooks and docs. |
-
 ## Data Sources and Study Scope
 
 Detailed endpoint contracts and field mappings are documented in `api_reference.md`, Section: Dictionary.
@@ -56,15 +39,14 @@ Detailed endpoint contracts and field mappings are documented in `api_reference.
   - Role in analysis: provides median income fields for score-income correlation analysis.
   - Evidence: `full_workflow.ipynb`, Section 9.
 
-The selected SA4 scope is configured in `configs/local.yaml`. SA2 counts should be filled from the final notebook/database outputs.
+The selected SA4 scope is configured in `configs/local.yaml`. SA2 counts are read back from the final PostGIS `sa2` table after the Task 2 import.
 
 | Member name | Unikey | Selected SA4 | SA2 count |
-| --- | --- | --- |  |
+| --- | --- | --- | --- |
 | Xuejian Fang | xfan0282 | Sydney - City and Inner South | 27 |
 | Daniel Kaiqi Bi | dabi0142 | Sydney - Parramatta | 34 |
 | Jinyu Zhou | jzho0172 | Sydney - North Sydney and Hornsby | 26 |
 | Xuanhao Yu | xuyu8020 | Sydney - Northern Beaches | 19 |
-
 
 All selected SA4 areas are within Greater Sydney. The current configuration uses `task2_import.crawl_scope: selected_sa4` and `task3_score.score_universe: selected_sa4`, so the score distribution is calculated over the selected member SA4 set rather than every SA2 in Greater Sydney.
 
@@ -74,18 +56,16 @@ The Task 1 cleaning workflow is shown in `full_workflow.ipynb`, Section 2: Task 
 
 The implemented cleaning steps standardise column names, standardise text columns, extract unit information, handle missing values and duplicate rows, convert year columns into numeric values, detect outliers, reshape the dataset into long format, and remove rows with missing observations.
 
-Each member's complete five derived statistics are provided in `task1_statistics.ipynb`, Section: Individual Derived Statistics. The report should only highlight selected findings that support the group-level analysis.
+Each member's complete five derived statistics are provided in `task1_statistics.ipynb`, Section: Individual Derived Statistics. The report highlights selected functions that support the group-level analysis.
 
-| Member | Selected derived statistic | Result summary | Why it matters |
+| Statistic function(s) | Selected derived statistic | Result summary | Why it matters |
 | --- | --- | --- | --- |
-| xfan0282 | Work-from-home growth and public transport commute decline | Work-from-home share grew 6.42x from 4.82% to 30.98%; public transport commute share dropped by 11.98 percentage points from 15.98% to 4.00%. | These findings show a major change in commuting behaviour and provide context for interpreting transport resources, POI patterns, and accessibility. |
-| dabi0142 | Population growth rate, working-age population percentage, unemployment rate change, most volatile indicator, longest increase streak | NSW population growth result was negative in the output, working-age population was around 64.7%, unemployment had a largest yearly change of -2.3 percentage points, and one indicator showed a 5-year increase streak.  | These statistics help show long-term demographic and labour market patterns in NSW, while also highlighting possible data quality or indicator selection issues. |
-| jzho0172 | Population growth and demographic structure | Estimated resident population grew by 5.38% from 2019 to 2024. Population density increased by 0.60 persons/km², and females made up 50.26% of the 2024 population. | These findings show recent population growth and demographic balance in NSW, which provides useful context for interpreting demand for services and POI-based resource scores. |
-| xuyu8020 | Population structure, gender balance, income growth, income distribution, and business dynamics | NSW had an age dependency ratio of 54.44 dependents per 100 working-age persons in 2024. The sex ratio was 98.98 males per 100 females. Median total income increased by 15.16% from 2018 to 2022, while mean total income was 37.03% higher than median income in 2022. The business net entry rate was 2.95% of total businesses in 2024. | These statistics provide demographic and economic context for later resource analysis. Population structure may affect service demand, income statistics help describe economic conditions, and business entry-exit patterns indicate local economic activity. |
+| `xfan0282_2()`, `xfan0282_3()`, `xfan0282_5()` | Work-from-home growth, public transport commute decline, and housing stress | Work-from-home share grew 6.42x from 4.82% to 30.98%; public transport commute share dropped by 11.98 percentage points from 15.98% to 4.00%; rent stress was 2.05x mortgage stress in 2021. | These findings show major changes in commuting behaviour and housing pressure, providing context for interpreting transport resources, local POI demand, and accessibility. |
+| `dabi0142_1()` to `dabi0142_5()` | Population growth rate, working-age population percentage, unemployment rate change, most volatile indicator, and longest increase streak | NSW population growth result was negative in the output, working-age population was around 64.7%, unemployment had a largest yearly change of -2.3 percentage points, and one indicator showed a 5-year increase streak. | These statistics help show long-term demographic and labour market patterns in NSW, while also highlighting possible data quality or indicator selection issues. |
+| `jzho0172_1()`, `jzho0172_2()`, `jzho0172_3()` | Population growth and demographic structure | Estimated resident population grew by 5.38% from 2019 to 2024. Population density increased by 0.60 persons/km², and females made up 50.26% of the 2024 population. | These findings show recent population growth and demographic balance in NSW, which provides useful context for interpreting demand for services and POI-based resource scores. |
+| `xuyu8020_1()` to `xuyu8020_5()` | Population structure, gender balance, income growth, income distribution, and business dynamics | NSW had an age dependency ratio of 54.44 dependents per 100 working-age persons in 2024. The sex ratio was 98.98 males per 100 females. Median total income increased by 15.16% from 2018 to 2022, while mean total income was 37.03% higher than median income in 2022. The business net entry rate was 2.95% of total businesses in 2024. | These statistics provide demographic and economic context for later resource analysis. Population structure may affect service demand, income statistics help describe economic conditions, and business entry-exit patterns indicate local economic activity. |
 
-TODO: 添加一段简短的小组层面总结，说明 Task 1 的发现如何支持 POI score 分析、SA4 对比或局限性讨论。
-
-Overall, the Task 1 findings provide useful context for the later POI-based resource analysis. The commuting-related statistics show that patterns of work and transport use changed substantially between 2016 and 2021, which is relevant when interpreting transport and community POIs. The demographic and income statistics show that NSW has both service demand pressures and economic variation, which helps explain why a simple POI count should be interpreted carefully. These findings support the later analysis by showing that resource distribution is not only a geographic issue, but also connected to population structure, income patterns, business activity, and changing mobility behaviour.
+Overall, the Task 1 findings provide useful context for the later POI-based resource analysis. The commuting statistics show changes in work and transport behaviour, while the demographic and income statistics show that resource scores should be interpreted alongside population structure, affordability, business activity, and changing mobility patterns rather than as simple POI counts alone.
 
 ## Database Schema and Indexing
 
@@ -124,16 +104,18 @@ Detailed API extraction parameters, metadata checks, and persisted raw file path
 
 Task 2 first reads the selected SA4 scope from the configuration, fetches the SA2 polygons within that scope, and builds one bbox request for each SA2. The NSW POI API is then queried with those bbox envelopes. Raw responses and raw features are persisted for reproducibility, cleaned POI records are written to `poi_clean`, and final POI-to-SA2 assignment is performed in PostGIS.
 
-Bbox extraction only returns candidate POIs because a rectangular bbox can include points outside the actual SA2 polygon. Final assignment uses `ST_Covers(sa2.geometry, poi_clean.geometry)` and writes the result to `sa2_poi`. If one POI matches multiple SA2 polygons on a boundary, the deterministic rule keeps the first `sa2_code` in ascending order.
+Bbox extraction only returns candidate POIs because a rectangular bbox can include points outside the actual SA2 polygon. Final assignment uses `ST_Covers(sa2.geometry, poi_clean.geometry)` and writes the result to `sa2_poi`. If one POI matches multiple SA2 polygons on a boundary, the deterministic rule keeps the first `sa2_code` in ascending order. Therefore, raw bbox features are not used directly for the score; `sa2_poi` is the final polygon-assigned geographic dataset.
+
+The selected SA2 areas were also validated against their parent SA4 polygons in PostGIS. The evidence query checks `ST_Covers(sa4.geometry, ST_PointOnSurface(sa2.geometry))` and requires an SA2-to-SA4 area coverage ratio of at least `0.999`. All 106 imported SA2 polygons passed this validation, with zero point failures and zero missing parent SA4 records.
 
 | Evidence item | Value |
 | --- |-------|
 | Response files | 106   |
 | Raw feature rows | 16468 |
-| Clean POI rows | 2365  |
-| Assigned POI rows | 2086  |
-| Unassigned POI rows | 279   |
-| Boundary duplicate candidates | 0     |
+| Clean POI rows | 9634 |
+| Assigned POI rows | 7894 |
+| Unassigned POI rows | 1740 |
+| Boundary duplicate candidates | 0 |
 
 ## Score Calculation Method
 
@@ -147,11 +129,19 @@ score_100 = score_raw * 100
 
 `poi_count` is aggregated from `sa2_poi` by SA2. The current configuration uses `score_universe: selected_sa4`, so `mean_poi_count` and `std_poi_count` are calculated across the selected member SA4 areas.
 
-SA2 areas with population below `100` are filtered out by `task3_score.min_population`. SA2 areas with missing population are retained by the current implementation.
+SA2 areas are scored only when `population >= 100`, using `task3_score.min_population`. SA2 areas with population below `100` or missing population are excluded from `sa2_score`. In the current selected-SA4 run, 101 of 106 imported SA2 areas were scored; the five excluded SA2 areas had population below the threshold.
 
 The z-score standardises POI counts relative to the selected score universe. The sigmoid transformation maps the standardised values onto a 0-1 range, and multiplying by 100 gives an interpretable 0-100 score while reducing the visual impact of extreme POI counts.
 
 The score is a quantity-based resource indicator. It does not measure service quality, service capacity, opening hours, accessibility, or resident demand.
+
+As an extension and sensitivity analysis, the report also compares the baseline score with a population-adjusted POI density view:
+
+```text
+poi_per_1000 = (poi_count / population) * 1000
+```
+
+This extension does not replace the required baseline formula. Instead, it checks whether areas with high raw POI counts still appear well-resourced after considering resident population size.
 
 ## Results Analysis and Visualisations
 
@@ -161,27 +151,19 @@ The figures below provide the report-level interpretation of the score results. 
 
 ![Score distribution histogram](figures/score_histogram.png)
 
-TODO: 解释 score 分布形状、主要集中区间、偏态，以及明显高分或低分的 SA2。
-
-The score histogram shows that most SA2 regions fall within the lower-to-middle score range, especially around 30 to 55. The distribution is right-skewed, with fewer SA2s receiving very high scores above 80. This suggests that highly resourced SA2s are relatively uncommon within the selected SA4 scope. Most areas have moderate POI availability, while a small number of areas contain much denser POI concentrations and therefore receive much higher scores.
+The score histogram shows that most SA2 regions fall within the lower-to-middle score range, especially around 30 to 55. Across the 101 scored SA2s, scores range from 19.93 to 99.46, with a median of 45.91 and an interquartile range from 35.48 to 57.63. The distribution is right-skewed, with fewer SA2s receiving very high scores above 80. This suggests that highly resourced SA2s are relatively uncommon within the selected SA4 scope. Most areas have moderate POI availability, while a small number of areas contain much denser POI concentrations and therefore receive much higher scores.
 
 ### Spatial Pattern of Scores
 
 ![SA2 score choropleth map](figures/sa2_score_choropleth.png)
 
-TODO: 解释高分和低分是否集中在特定 SA4、城市中心、沿海区域、郊区边缘或其他空间模式中。不要只描述颜色。
-
 The score map shows that high-scoring SA2s are not evenly distributed across the selected regions. Several higher-score areas appear around more urbanised or activity-centre locations, while lower-score areas are more common in less dense or more residential parts of the selected SA4s. The Northern Beaches and North Sydney and Hornsby areas contain several high-scoring SA2s, while parts of Parramatta and City and Inner South show more mixed results. This indicates that POI concentration is strongly spatial rather than randomly distributed.
 
 ![Population-adjusted POI density map](figures/poi_density_choropleth.png)
 
-TODO: 比较 score map 和 population-adjusted POI density map，说明按人口调整后哪些 SA2 仍然较高，哪些区域的 raw POI count 可能受到人口规模、土地使用或特殊 POI cluster 的影响。
-
-The population-adjusted POI density map provides a different interpretation from the raw score map. Some SA2s with high raw POI counts may not appear as strong after adjusting by population, because their larger resident base reduces POI density per person. In contrast, some lower-population areas can appear relatively high on the density map even if their raw POI count is not among the highest.
+The population-adjusted POI density map is used as an extension and sensitivity analysis for the baseline score. Some SA2s with high raw POI counts may not appear as strong after adjusting by population, because their larger resident base reduces POI density per person. In contrast, some lower-population areas can appear relatively high on the density map even if their raw POI count is not among the highest. This comparison helps identify where the baseline score may be influenced by population size, land use, or unusually dense POI clusters.
 
 ![POI point scatter map](figures/poi_point_scatter.png)
-
-TODO: 解释 POI 点位分布，包括线性、聚集、交通相关、沿海或商业区模式，并说明这些模式如何影响 SA2 层面的 score。
 
 The POI point map shows clear clustering rather than an even spread of facilities. POIs are concentrated around urban centres, coastal activity areas, transport corridors, and commercial or community hubs. This clustering helps explain why nearby SA2s can receive very different scores: the score depends not only on the size of the SA2, but also on whether major POI clusters fall inside its boundary. It also confirms why the final polygon spatial join is necessary after bbox extraction.
 
@@ -191,8 +173,6 @@ The POI point map shows clear clustering rather than an even spread of facilitie
 
 ![Bottom scoring SA2s](figures/bottom_sa2_score.png)
 
-TODO: 解释最高分和最低分 SA2 的共同特征，并把解释和 POI count、SA4 位置、人口或土地使用背景联系起来。
-
 The highest-scoring SA2s include areas such as Sydenham - Tempe - St Peters, Sydney (North) - Millers Point, Newport - Bilgola, Bayview - Elanora Heights, Avalon - Palm Beach, and Manly - Fairlight. These areas are likely to contain dense clusters of recreation, community, transport, or activity-centre POIs. Northern Beaches and North Sydney and Hornsby appear frequently among the top-scoring SA2s, suggesting strong internal POI concentration in these SA4s.
 
 The lowest-scoring SA2s include areas such as Dee Why (South) - North Curl Curl, South Wentworthville, Berala, Auburn - North, Parramatta - South, and Banksmeadow. These lower scores may reflect fewer recorded POIs inside the SA2 boundary, more residential land use, or POIs being concentrated in neighbouring SA2s instead. The comparison between top and bottom SA2s shows that resource scores are highly sensitive to local land use and POI clustering.
@@ -201,15 +181,11 @@ The lowest-scoring SA2s include areas such as Dee Why (South) - North Curl Curl,
 
 ![SA4 score boxplot](figures/sa4_score_boxplot.png)
 
-TODO: 解释各 SA4 的 median、spread、range 和 outlier，并说明哪个 SA4 内部差异更大、哪个更集中。
-
-The SA4 boxplot shows clear differences between the selected SA4 regions. Sydney - North Sydney and Hornsby and Sydney - Northern Beaches have relatively high median scores and wide score ranges, indicating that they contain both moderately resourced and highly resourced SA2s. Sydney - City and Inner South has a lower central tendency but includes extreme high-score outliers, suggesting that a few inner-city activity centres contain very dense POI clusters. Sydney - Parramatta shows a broad distribution but generally lower scores than the strongest North Sydney and Northern Beaches areas.
+The SA4 boxplot shows clear differences between the selected SA4 regions. Sydney - North Sydney and Hornsby has the highest mean score (55.21) and median score (53.21), followed closely by Sydney - Northern Beaches with a mean of 54.39 and median of 51.56. Sydney - Parramatta has a lower median of 45.44, while Sydney - City and Inner South has the lowest median of 36.79 but contains the highest individual SA2 score, Sydenham - Tempe - St Peters at 99.46. This means variation occurs both between SA4s and within each SA4: City and Inner South is especially uneven, while North Sydney and Hornsby is more consistently high.
 
 ### POI Group Composition
 
 ![POI group distribution](figures/poi_group_distribution.png)
-
-TODO: 解释哪些 POI group 占主导、哪些 group 较少，以及 POI group 组成是否可能影响 score 的解释。
 
 The POI group distribution is dominated by Recreation, followed by Community and Transport. Education and Place also contribute a noticeable number of POIs, while Landform, Hydrography, Utility, and Industry appear much less frequently. This composition matters because the baseline score treats all POIs equally. As a result, SA2s with many recreation or community POIs may receive higher scores even if they do not necessarily have stronger access to essential services such as health, education, or transport.
 
@@ -217,20 +193,19 @@ The POI group distribution is dominated by Recreation, followed by Community and
 
 ![Score and median income correlation](figures/score_income_correlation.png)
 
-TODO: 报告 Pearson 和 Spearman 的 statistic、p-value、n、alpha 和 significance。数值必须来自 `score_income_correlation` 或 notebook output。
+| Method | Statistic | p-value | n | Significant? | Interpretation |
+| --- | --- | --- | --- | --- | --- |
+| Pearson | 0.171 | 0.089 | 100 | No | Weak positive linear relationship, not statistically significant at alpha = 0.05. |
+| Spearman | 0.202 | 0.044 | 100 | Yes | Weak positive rank relationship, statistically significant but small in effect size. |
 
-| Method | Statistic | p-value | n    | Significant? | TODO: 解释 |
-| --- | --- | --- |------|-------| --- |
-| Pearson | 0.197362 | 0.287228 | 31   | False |  Weak positive linear relationship, but not statistically significant. |
-| Spearman | 0.226347 | 0.220793 | 31 | No | Weak positive monotonic relationship, but not statistically significant. |
+The income relationship is weak overall. Pearson correlation is not statistically significant, while Spearman correlation is significant at alpha = 0.05 but still small. This suggests that higher-income SA2s may tend to rank slightly higher in resource score, but income alone does not explain the score pattern. The weak relationship is plausible because POI locations are also shaped by land use, transport corridors, commercial centres, coastal recreation areas, data reference years, and SA2 aggregation. The result should not be interpreted as causal.
 
-TODO: 解释 score 和 median income 是否存在统计显著关系。即使显著，也需要说明相关性不等于因果关系。
+## Conclusion
 
-TODO: 如果关系较弱或不显著，解释可能原因，例如 POI 位置、城市密度、土地使用、交通枢纽、income 数据年份或 SA2 聚合效应。
-The correlation analysis suggests that there was only a weak positive relationship between well-resourced scores and median income across the selected SA2 regions. Both Pearson and Spearman tests produced positive correlation values, but the p-values were greater than the selected significance level of 0.05. This means the relationship was not statistically significant in this dataset.
-The results indicate that higher-income areas did not always achieve substantially higher accessibility scores. Several middle-income regions still recorded relatively strong scores because of higher concentrations of transport, recreation, and community facilities.
-There are several possible reasons why the relationship appeared weak. Accessibility scores were mainly based on POI distribution rather than service quality or transport efficiency. Urban density, commercial concentration, land use patterns, and transport hubs may also influence resource accessibility independently from household income levels. In addition, the analysis relied on aggregated SA2-level data and external API datasets, which may not fully capture local accessibility differences between smaller neighbourhoods.
-Even if a stronger relationship had been observed, correlation alone would not demonstrate a direct causal relationship between median income and accessibility scores.
+The scores vary substantially across the selected SA2 regions. Scores range from 19.93 to 99.46, with an interquartile range from 35.48 to 57.63, so the variation is meaningful rather than minor. Variation also appears across SA4s: North Sydney and Hornsby and Northern Beaches have higher median scores, Parramatta is more moderate, and City and Inner South has a lower median but several strong high-score outliers.
+
+The variation is mainly explained by spatial clustering and land use. High-scoring SA2s tend to contain activity centres, coastal or recreation clusters, transport-related POIs, and dense community or commercial facilities, while low-scoring SA2s are often more residential or sit outside major POI clusters. The scoring method is appropriate as the required baseline because it follows `sigmoid(z_poi)` and produces an interpretable 0-100 score, but it remains a quantity-based indicator. It does not measure service quality, capacity, travel time, or actual accessibility, so the population-adjusted POI density map is used as a sensitivity check.
+
 ## Limitations and Further Work
 
 - POI count does not distinguish service quality, size, capacity, opening hours, or actual resident accessibility.
@@ -238,11 +213,27 @@ Even if a stronger relationship had been observed, correlation alone would not d
 - Bbox extraction returns candidate POIs only, so polygon spatial join is required. Boundary points still require deterministic handling.
 - Data sources may not all represent the same reference year, which can affect comparisons between POIs, population, and income.
 - The relationship between median income and resource score is correlational and should not be interpreted as causal.
-- The current score is mainly based on POI count and does not include travel time, public transport frequency, population demand, or service weighting.
+- The current baseline score is mainly based on raw POI count. The population-adjusted POI density map partially tests population demand sensitivity, but the score itself still does not include travel time, public transport frequency, service weighting, or service quality.
 
 Further work could add category-specific POI weights, network travel distance, and sensitivity analysis for different score universes or population filters.
 
-## Reproducibility and Contribution Appendix
+## Appendix: Evidence, Reproducibility and Contributions
+
+### Evidence Map
+
+| Rubric area | Primary evidence | Report coverage |
+| --- | --- | --- |
+| Data Import | `full_workflow.ipynb`, Section 3: Data Source Summary; Section 5: Task 2 API Extraction and Crawl Plan | Dataset summary and API extraction evidence. |
+| Dataset Description | `full_workflow.ipynb`, Section 3: Data Source Summary; `api_reference.md`, Section: Dictionary | Concise dataset source, role, and field-mapping summary. |
+| API Extraction | `full_workflow.ipynb`, Section 5: Task 2 API Extraction and Crawl Plan; `api_reference.md`, Section: Design Notes | API workflow summary, selected-SA4 crawl scope, bbox request process, and extraction result table. |
+| Database Schema | `full_workflow.ipynb`, Section 4: Database Schema and Indexes; `database_reference.md`, Section: Dictionary | ERD, table roles, key relationships, geometry types, and SRID summary. |
+| Database Indexing | `full_workflow.ipynb`, Section 4: Database Schema and Indexes; `database_reference.md`, Section: Dictionary | Spatial GiST indexes and filter/ranking indexes used for joins, maps, scoring, and correlation queries. |
+| Spatial Join | `full_workflow.ipynb`, Section 6: Spatial Join Evidence; `task2_task3_analysis.ipynb`, Section: Task 2 Evidence | `ST_Covers` explanation, bbox-candidate limitation, deterministic boundary handling, SA2-to-SA4 validation, and POI assignment summary. |
+| Score Calculation | `full_workflow.ipynb`, Section 7: Task 3 Score Calculation | `z_poi`, sigmoid score formula, score universe, population filter, 0-100 score scaling, and method limitations. |
+| Results Analysis | `full_workflow.ipynb`, Section 8: Results Analysis; `task2_task3_analysis.ipynb`, Section: Individual Visual Analysis | Interpretation of score distribution, spatial score pattern, POI density, POI clusters, top/bottom SA2s, SA4 comparison, and POI group composition. |
+| Correlation Analysis | `full_workflow.ipynb`, Section 9: Correlation Analysis | Pearson/Spearman result table, significance test, interpretation, and non-causal limitation. |
+| Data Visualisations | `full_workflow.ipynb`, Section 10: Report Figures | Report figures including score histogram, choropleth maps, POI point map, ranking charts, SA4 boxplot, POI group chart, and score-income scatter plot. |
+| Report Quality | `report.md`, Section: Full report | Structured report with evidence links, technical summaries, visual interpretation, limitations, conclusion, reproducibility notes, and contribution appendix. |
 
 Supporting technical references:
 
@@ -282,15 +273,27 @@ uv run data2001 run-workflow
 uv run data2001 generate-figures
 ```
 
-TODO: contribution summary。
+### Contributions
 
-- xfan0282
-  - TODO
-- dabi0142
-  - TODO
-- jzho0172
-  - TODO
-- xuyu8020
-   - Implemented additional Task 1 cleaning steps, including removal of missing long-format observations
-   - Implemented five Task 1 derived statistics covering age dependency, sex ratio, income growth, income distribution, and business net entry rate.
-   - Worked on the Sydney - Northern Beaches SA4 scope for Task 2 and Task 3 analysis.
+The table below summarises the main contributions by member. Commit hashes are provided as supporting evidence; a contribution may be supported by multiple commits where implementation, fixes, notebook evidence, and report integration were completed separately.
+
+| Member | Contribution area | Contribution details | Supporting commit hashes |
+| --- | --- | --- | --- |
+| Xuejian Fang (`xfan0282`) | Task 1 cleaning | Implemented `extract_unit_column()` to separate measurement units from raw description text into a `unit` column and integrate the step into the Task 1 cleaning workflow. | `9d830fb`, `677474a`, `f9a5488`, `6522ef5` |
+| Xuejian Fang (`xfan0282`) | Task 1 statistics | Implemented and refined `xfan0282_1()` to `xfan0282_5()`, covering apartment share increase, work-from-home growth, public transport commute decline, occupation commute distance gap, and rent stress relative to mortgage stress. | `70a9ccf`, `463ca42` |
+| Xuejian Fang (`xfan0282`) | Core pipeline and database | Built the project configuration, PostgreSQL/PostGIS schema, database indexes, workflow runner, Task 2 POI ingestion, Task 3 scoring, and correlation pipeline. | `b62b1cf`, `dbf4542`, `080fe59`, `d861094`, `2121936`, `afd0c09` |
+| Xuejian Fang (`xfan0282`) | Task 4 visualisation and report integration | Implemented report visualisations, map outputs, dashboard/export support, member evidence notebooks, generated figures, and final report draft integration. | `32ec4d9`, `d7dcb3e`, `399e42f`, `f776326`, `fec66a4`, `f98d6af` |
+| Daniel Kaiqi Bi (`dabi0142`) | Task 1 cleaning | Implemented and updated `clean_column_names()`, `clean_missing_values()`, `convert_numeric_columns()`, `reshape_wide_to_long()`, and `validate_and_flag_outliers()` for the early Task 1 cleaning pipeline. | `72eb43c`, `1968fb0`, `8767754`, `b64ec6d`, `90162d4`, `a370b3d` |
+| Daniel Kaiqi Bi (`dabi0142`) | Task 1 statistics | Implemented and updated `dabi0142_1()` to `dabi0142_5()`, covering population growth rate, working-age population percentage, largest unemployment rate change, most volatile indicator, and longest increase streak. | `02169a2`, `bb809ab`, `4119216` |
+| Daniel Kaiqi Bi (`dabi0142`) | Task 2/3 analysis and workflow support | Contributed Parramatta-focused analysis material and updated the shared workflow notebook used for end-to-end Task 2/3 evidence and report interpretation. | `bb809ab`, `4119216`, `b90603b`, `8fa7b44` |
+| Daniel Kaiqi Bi (`dabi0142`) | Notebook and report support | Added project overview and analysis material, updated notebook analysis, and contributed to the shared full workflow notebook and report context. | `bb809ab`, `4119216`, `b90603b` |
+| Jinyu Zhou (`jzho0172`) | Task 1 cleaning | Implemented `standardise_text_columns()` to trim text fields, convert empty strings to missing values, and connect the step to the Task 1 cleaning workflow. | `9382387` |
+| Jinyu Zhou (`jzho0172`) | Task 1 statistics | Implemented `jzho0172_1()` to `jzho0172_5()`, covering estimated resident population growth, population density change, female population share, female-male population gap, and median male age change; also added Task 1 visualisation support. | `4bd37ac`, `37b626e` |
+| Jinyu Zhou (`jzho0172`) | Task 2/3 workflow evidence support | Helped maintain and integrate the shared full workflow notebook, including notebook conflict resolution and group evidence material used alongside the Task 2/3 workflow outputs. | `4bd37ac`, `ec15663`, `5a0a739` |
+| Jinyu Zhou (`jzho0172`) | Notebook and report support | Added notebook/report notes explaining the `jzho0172` cleaning step, statistics, and Task 1 findings; filled the final SA2 count for the member scope; also resolved notebook/report integration conflicts. | `5a0a739`, `606d9d1`, `d7f86df`, `ec15663`, `405cd14`, `4456a10` |
+| Xuanhao Yu (`xuyu8020`) | Task 1 cleaning | Implemented `drop_missing_observations()` to remove missing long-format value rows after reshaping and fixed an index-handling issue in that step. | `97016f1`, `bb5fe5e` |
+| Xuanhao Yu (`xuyu8020`) | Task 1 statistics | Implemented `xuyu8020_1()` to `xuyu8020_5()`, covering age dependency ratio, sex ratio, median total income growth, mean-to-median total income gap, and business net entry rate. | `4ac76d4` |
+| Xuanhao Yu (`xuyu8020`) | Task 2/3 selected-SA4 analysis | Worked on the Sydney - Northern Beaches Task 2/3 analysis by updating the member notebook, adding key findings, adjusting report evidence values, and configuring the member SA4 scope. | `97be051`, `620c748`, `a7826b0`, `0fa1be3` |
+| Xuanhao Yu (`xuyu8020`) | Notebook and report support | Added `xuyu8020` Task 1 notebook evidence, worked on the Sydney - Northern Beaches Task 2/3 analysis, filled pending report sections, adjusted evidence values, merged main into the report branch, and added key findings. | `97be051`, `620c748`, `a7826b0`, `0fa1be3`, `f55fae4`, `541587c` |
+
+All members contributed to the shared report and group notebook evidence, while each member also maintained their own Task 1 cleaning function, Task 1 statistics module, and member-level notebook analysis.
