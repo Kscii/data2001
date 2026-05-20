@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Strip notebook outputs and reset execution counts.
+"""Strip notebook outputs, cell ids, and execution counts.
 
 Usage:
     uv run python scripts/nbclean.py              # clean all notebooks under notebooks/
@@ -18,13 +18,32 @@ NOTEBOOKS_DIR = PROJECT_ROOT / "notebooks"
 _VOLATILE_CELL_METADATA = {"collapsed", "scrolled", "execution", "jupyter"}
 
 
+def _display_path(path: Path) -> str:
+    """Return a compact path for log output."""
+    try:
+        return str(path.relative_to(PROJECT_ROOT))
+    except ValueError:
+        return str(path)
+
+
 def clean_notebook(path: Path) -> bool:
-    """Strip outputs and reset execution counts. Return True if file was changed."""
+    """Strip outputs, cell ids, and execution counts. Return True if file was changed."""
     raw = path.read_text(encoding="utf-8")
     nb = json.loads(raw)
 
     changed = False
     for cell in nb.get("cells", []):
+        if "id" in cell:
+            del cell["id"]
+            changed = True
+
+        cell_meta = cell.get("metadata", {})
+        volatile = _VOLATILE_CELL_METADATA & set(cell_meta)
+        for key in volatile:
+            del cell_meta[key]
+        if volatile:
+            changed = True
+
         if cell.get("cell_type") != "code":
             continue
 
@@ -36,18 +55,11 @@ def clean_notebook(path: Path) -> bool:
             cell["outputs"] = []
             changed = True
 
-        cell_meta = cell.get("metadata", {})
-        volatile = _VOLATILE_CELL_METADATA & set(cell_meta)
-        for key in volatile:
-            del cell_meta[key]
-        if volatile:
-            changed = True
-
     if changed:
         path.write_text(json.dumps(nb, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
-        print(f"cleaned: {path.relative_to(PROJECT_ROOT)}")
+        print(f"cleaned: {_display_path(path)}")
     else:
-        print(f"already clean: {path.relative_to(PROJECT_ROOT)}")
+        print(f"already clean: {_display_path(path)}")
     return changed
 
 
