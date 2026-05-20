@@ -63,7 +63,7 @@ The selected SA4 scope is configured in `configs/local.yaml`. SA2 counts should 
 | Xuejian Fang | xfan0282 | Sydney - City and Inner South | 27 |
 | TODO | dabi0142 | Sydney - Parramatta | TODO |
 | TODO | jzho0172 | Sydney - North Sydney and Hornsby | TODO |
-| TODO | xuyu8020 | Sydney - Northern Beaches | TODO |
+| Xuanhao Yu | xuyu8020 | Sydney - Northern Beaches | 19 |
 
 All selected SA4 areas are within Greater Sydney. The current configuration uses `task2_import.crawl_scope: selected_sa4` and `task3_score.score_universe: selected_sa4`, so the score distribution is calculated over the selected member SA4 set rather than every SA2 in Greater Sydney.
 
