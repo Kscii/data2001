@@ -1,4 +1,3 @@
-"""POI 查询参数和 bbox 抓取请求构建工具."""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -11,7 +10,6 @@ from data2001.task2_import.records import ArcGISFeature
 
 @dataclass(frozen=True)
 class POIFetchRequest:
-    """一次 POI bbox 抓取请求的来源和范围."""
     source_level: str
     source_code: str
     source_name: str
@@ -19,7 +17,6 @@ class POIFetchRequest:
 
 
 def build_poi_bbox_params(settings: Settings, bbox: BBox) -> dict[str, Any]:
-    """构造 NSW POI bbox 查询参数.bbox 只生成候选 POI, 最终归属仍靠 SA2 polygon."""
     layer = settings.api.layer("poi")
     return {
         "where": "1=1",
@@ -35,7 +32,6 @@ def build_poi_bbox_params(settings: Settings, bbox: BBox) -> dict[str, Any]:
 
 
 def build_sa2_bbox_requests(sa2_features: list[ArcGISFeature]) -> list[POIFetchRequest]:
-    """特定 SA4 或 Greater Sydney 抓取时, 都按 SA2 bbox 逐个抓 POI."""
     requests: list[POIFetchRequest] = []
     for feature in sa2_features:
         attrs = feature["attributes"]

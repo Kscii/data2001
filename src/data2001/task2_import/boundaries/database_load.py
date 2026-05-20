@@ -1,4 +1,3 @@
-"""Task 2 入库函数, 把解析后的边界和人口记录写入 PostgreSQL/PostGIS."""
 from __future__ import annotations
 
 from sqlalchemy import Engine

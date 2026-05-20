@@ -1,4 +1,3 @@
-"""Task 2 boundary import：抓取 SA4/SA2 边界和 SA2 population 并写库."""
 from __future__ import annotations
 
 from sqlalchemy import Engine
@@ -13,7 +12,6 @@ from data2001.task2_import.poi.cleaning import parse_population_feature
 
 
 def run_boundary_import(engine: Engine, settings: Settings) -> StepSummary:
-    """抓取并入库 SA4、SA2 边界和 SA2 population."""
     client = create_arcgis_client(settings)
     validate_metadata(client, settings, ["sa4", "sa2", "population"])
 

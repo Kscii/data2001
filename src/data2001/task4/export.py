@@ -1,4 +1,3 @@
-"""Report PNG 导出入口, 复用 notebook 和 Dash 使用的 Plotly 图表构建函数."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -30,7 +29,6 @@ from data2001.task4.queries import (
 
 
 def write_png(fig: go.Figure, path: Path, settings: Settings) -> None:
-    """把单个 Plotly figure 导出为 PNG 文件."""
     path.parent.mkdir(parents=True, exist_ok=True)
     fig.write_image(
         str(path),
@@ -42,7 +40,6 @@ def write_png(fig: go.Figure, path: Path, settings: Settings) -> None:
 
 
 def export_report_charts(engine: Engine, settings: Settings) -> dict[str, Path]:
-    """查询数据库并生成 report 需要的所有 PNG 图表."""
     charts_dir = resolve_project_path(settings.outputs.charts_dir)
     scores = load_sa2_scores(engine, settings)
     score_map_areas = load_sa2_scores(engine, settings, include_excluded=True)

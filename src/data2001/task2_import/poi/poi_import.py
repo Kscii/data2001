@@ -1,4 +1,3 @@
-"""Task 2 POI import：按 SA2 bbox 抓 raw JSON, 清洗 POI 并执行空间归属."""
 from __future__ import annotations
 
 import sys
@@ -35,7 +34,6 @@ def _report_bbox_progress(
     total: int,
     source_name: str,
 ) -> None:
-    """按配置间隔向终端报告 SA2 bbox 抓取进度."""
     if reporter is None:
         return
     interval = max(settings.progress.bbox_log_interval, 1)
@@ -51,7 +49,6 @@ def _format_fetch_progress_text(
     response_count: int,
     raw_feature_count: int,
 ) -> str:
-    """生成 alive-progress 右侧显示的 POI 抓取状态文字."""
     return (
         f"req={current}/{total} "
         f"pages={request_pages} "
@@ -62,7 +59,6 @@ def _format_fetch_progress_text(
 
 
 def _write_poi_batch(engine: Engine, settings: Settings, batch: list[PoiRecord]) -> None:
-    """把一批 POI dataclass 显式转换成 repository 参数后写库."""
     upsert_poi_records(
         engine,
         settings.database.schema_name,
@@ -76,7 +72,6 @@ def _clean_and_write_features(
     settings: Settings,
     features: Iterable[ArcGISFeature],
 ) -> int:
-    """把 raw features 清洗并分批入库, 避免单次 executemany 太大."""
     clean_count = 0
     batch: list[PoiRecord] = []
     seen_objectids: set[int] = set()
@@ -97,7 +92,6 @@ def _clean_and_write_features(
 
 
 def _assign_if_needed(engine: Engine, settings: Settings, clean_and_assign: bool) -> None:
-    """在需要时执行 POI 到 SA2 的空间归属."""
     if clean_and_assign:
         assign_poi_to_sa2(engine, settings.database.schema_name, settings.spatial.assignment_method)
 
@@ -109,7 +103,6 @@ def run_poi_import(
     clean_and_assign: bool = True,
     reporter: ProgressReporter | None = None,
 ) -> StepSummary:
-    """按 SA2 bbox 抓取 POI raw JSON, 并可选清洗入库和执行空间归属."""
     client = create_arcgis_client(settings)
     validate_metadata(client, settings, ["poi", "sa2"])
     sa2_features = fetch_sa2_features_for_crawl(client, settings)

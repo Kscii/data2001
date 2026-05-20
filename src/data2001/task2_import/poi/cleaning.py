@@ -1,4 +1,3 @@
-"""Task 2 清洗函数, 把 ArcGIS raw feature 转成数据库可入库记录."""
 from __future__ import annotations
 
 from datetime import UTC, datetime
@@ -9,7 +8,6 @@ from data2001.task2_import.records import ArcGISFeature, PoiRecord, Sa2Populatio
 
 
 def arcgis_millis_to_datetime(value: Any) -> datetime | None:
-    """把 ArcGIS 毫秒时间戳转换成 Python datetime."""
     if value is None:
         return None
     try:
@@ -19,12 +17,10 @@ def arcgis_millis_to_datetime(value: Any) -> datetime | None:
 
 
 def normalize_coordinate(value: Any) -> float:
-    """统一坐标浮点表达, 避免 API 返回 1e-14 级尾差."""
     return round(float(value), 12)
 
 
 def clean_poi_feature(settings: Settings, feature: ArcGISFeature) -> PoiRecord | None:
-    """清洗单个 POI feature；缺少 objectid 或坐标时丢弃."""
     attrs = feature.get("attributes", {})
     geometry = feature.get("geometry", {})
     objectid = attrs.get("objectid")
@@ -63,7 +59,6 @@ def clean_poi_feature(settings: Settings, feature: ArcGISFeature) -> PoiRecord |
 
 
 def parse_population_feature(settings: Settings, feature: ArcGISFeature) -> Sa2PopulationRecord:
-    """解析 SA2 population feature, 保留人口和人口密度字段."""
     attrs = feature["attributes"]
     return Sa2PopulationRecord(
         sa2_code=attrs.get(settings.population.sa2_code_field),

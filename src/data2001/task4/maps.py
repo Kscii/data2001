@@ -1,4 +1,3 @@
-"""Notebook、report 和 Dash 共用的 Plotly 地图构建函数."""
 from __future__ import annotations
 
 import json
@@ -12,7 +11,6 @@ EXCLUDED_LINE_COLOR = "rgba(75, 85, 99, 0.55)"
 
 
 def _score_geojson(scores_df: pd.DataFrame) -> dict:
-    """把带 geometry 的 SA2 score DataFrame 转成 Plotly 可用的 GeoJSON."""
     features = []
     for row in scores_df.to_dict("records"):
         geometry = row["geometry"]
@@ -109,7 +107,6 @@ def _prepend_excluded_layer(fig: go.Figure, excluded_df: pd.DataFrame) -> go.Fig
 
 
 def build_score_choropleth_map(scores_df: pd.DataFrame) -> go.Figure:
-    """构建 SA2 score choropleth 地图."""
     scored_df, excluded_df = _split_scored_and_excluded(scores_df)
     geojson = _score_geojson(scored_df)
     fig = px.choropleth_map(
@@ -150,7 +147,6 @@ def build_score_choropleth_map(scores_df: pd.DataFrame) -> go.Figure:
 
 
 def build_poi_density_choropleth_map(scores_df: pd.DataFrame) -> go.Figure:
-    """构建按人口调整后的 SA2 POI 密度 choropleth 地图."""
     data = scores_df.copy()
     population = pd.to_numeric(data["population"], errors="coerce")
     poi_count = pd.to_numeric(data["poi_count"], errors="coerce")
@@ -196,7 +192,6 @@ def build_poi_density_choropleth_map(scores_df: pd.DataFrame) -> go.Figure:
 
 
 def build_poi_point_scatter_map(poi_df: pd.DataFrame) -> go.Figure:
-    """构建 POI 点位 scatter map."""
     fig = px.scatter_map(
         poi_df,
         lat="latitude",
@@ -214,6 +209,6 @@ def build_poi_point_scatter_map(poi_df: pd.DataFrame) -> go.Figure:
         center={"lat": -33.86, "lon": 151.1},
         title="POI point locations",
     )
-    fig.update_traces(marker={"size": 3.5, "opacity": 0.6}) # 调整点的大小和透明度
+    fig.update_traces(marker={"size": 3.5, "opacity": 0.6})
     fig.update_layout(margin={"r": 0, "t": 50, "l": 0, "b": 0})
     return fig

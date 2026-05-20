@@ -1,4 +1,3 @@
-"""Dashboard callbacks, 负责根据筛选条件查询数据并生成当前 tab 内容."""
 from __future__ import annotations
 
 import pandas as pd
@@ -46,7 +45,6 @@ from data2001.task4.tables import build_sa4_summary_table
 
 
 def register_dashboard_callbacks(app: Dash, engine: Engine, settings: Settings) -> None:
-    """把 dashboard callback 注册到 Dash app."""
     @app.callback(
         Output("tab-content", "children"),
         Output("kpi-row", "children"),
@@ -57,7 +55,6 @@ def register_dashboard_callbacks(app: Dash, engine: Engine, settings: Settings) 
         Input("top-n", "value"),
     )
     def render_tab(tab: str, sa4_value, sa2_value, group_value, top_n):
-        """根据当前筛选器和 tab 查询数据库并返回图表、表格和 KPI."""
         sa4_names = [str(value) for value in as_list(sa4_value)]
         sa2_codes = [str(value) for value in as_list(sa2_value)]
         poi_groups = [str(value) for value in as_list(group_value)]
