@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS {schema}.sa4 (
 );
 
 CREATE TABLE IF NOT EXISTS {schema}.sa2 (
-    sa2_code TEXT PRIMARY KEY,
+    sa2_code TEXT PRIMARY KEY, -- 设定sa2_code为主键, 按照sa2_code进行去重, 保证每个sa2_code只有一条记录
     sa2_name TEXT NOT NULL,
     sa3_code TEXT,
     sa3_name TEXT,

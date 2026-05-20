@@ -22,6 +22,7 @@ from data2001.task2_import.workflow import (
     run_income_import,
     run_poi_import,
 )
+from data2001.task2_import.boundaries.validation import validate_sa2_sa4_membership
 from data2001.task3_score.workflow import run_task3_score_workflow
 from data2001.task4.export import export_report_charts
 
@@ -82,6 +83,11 @@ def run_import_boundaries_step(context: StepContext) -> StepSummary:
     return run_boundary_import(context.engine, context.settings)
 
 
+def run_validate_boundaries_step(context: StepContext) -> StepSummary:
+    """Validate imported SA2 polygons against their configured SA4 polygons."""
+    return validate_sa2_sa4_membership(context.engine, context.settings)
+
+
 def run_import_poi_step(context: StepContext) -> StepSummary:
     """Import raw POI JSON, clean POI records, and assign them to SA2."""
     return run_poi_import(context.engine, context.settings, reporter=context.reporter)
@@ -120,6 +126,7 @@ STEP_DEFINITIONS = [
     StepDefinition("check_db", "check-db", "Check database connection and schema", False, run_check_db_step),
     StepDefinition("plan_import", "plan-import", "Plan import scope and requests", False, run_plan_import_step),
     StepDefinition("import_boundaries", "import-boundaries", "Import boundaries and population", False, run_import_boundaries_step),
+    StepDefinition("validate_boundaries", "validate-boundaries", "Validate SA2 membership in SA4", False, run_validate_boundaries_step),
     StepDefinition("import_poi", "import-poi", "Import raw JSON and clean POI", False, run_import_poi_step),
     StepDefinition("import_income", "import-income", "Import SA2 income", False, run_import_income_step),
     StepDefinition("compute_score", "compute-score", "Compute score and income correlation", False, run_compute_score_step),

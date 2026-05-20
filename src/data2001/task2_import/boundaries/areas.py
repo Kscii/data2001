@@ -26,15 +26,6 @@ class BBox:
         """把 bbox 转成 ArcGIS envelope 参数字符串, 用于 ArcGIS API 查询参数."""
         return f"{self.minx},{self.miny},{self.maxx},{self.maxy}"
 
-    def as_dict(self) -> dict[str, float]:
-        """把 bbox 转成数据库入库字段字典."""
-        return {
-            "bbox_minx": self.minx,
-            "bbox_miny": self.miny,
-            "bbox_maxx": self.maxx,
-            "bbox_maxy": self.maxy,
-        }
-
 
 def _quote_values(values: list[str]) -> str:
     """把字符串列表安全拼成 SQL IN 条件使用的值."""

@@ -62,7 +62,7 @@ def upsert_sa2_records(engine: Engine, schema: str, records: list[dict[str, Any]
             :asgs_loci_uri, :bbox_minx, :bbox_miny, :bbox_maxx, :bbox_maxy,
             ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON(:geometry_geojson), :srid))
         )
-        ON CONFLICT (sa2_code) DO UPDATE SET
+        ON CONFLICT (sa2_code) DO UPDATE SET  -- 如果sa2_code冲突了, 就更新这条记录的其他字段为新值
             sa2_name = EXCLUDED.sa2_name,
             sa3_code = EXCLUDED.sa3_code,
             sa3_name = EXCLUDED.sa3_name,

@@ -32,7 +32,7 @@ def select_score_input(
             s.sa4_code,
             s.sa4_name,
             s.population,
-            COUNT(sp.poi_objectid)::integer AS poi_count
+            CAST(COUNT(sp.poi_objectid) AS integer) AS poi_count
         FROM {schema}.sa2 s
         LEFT JOIN {schema}.sa2_poi sp
           ON sp.sa2_code = s.sa2_code
@@ -76,4 +76,3 @@ def select_score_income_sample(
                 {"score_version": score_version, "score_universe": score_universe},
             ).mappings()
         ]
-

@@ -12,9 +12,14 @@ DEFAULT_SETTINGS_DATA = {
         "schema_name": "data2001",
     },
     "task2_import": {
-        "crawl_scope": "greater_sydney",
+        "crawl_scope": "selected_sa4",
         "gccsa_name": "Greater Sydney",
-        "selected_sa4_by_member": {},
+        "selected_sa4_by_member": {
+            "xfan0282": "Sydney - City and Inner South",
+            "dabi0142": "Sydney - Parramatta",
+            "jzho0172": "Sydney - North Sydney and Hornsby",
+            "xuyu8020": "Sydney - Northern Beaches",
+        },
         "sa4_codes": [],
         "clean_batch_size": 1000,
     },
@@ -22,6 +27,7 @@ DEFAULT_SETTINGS_DATA = {
         "enabled_steps": [
             "plan_import",
             "import_boundaries",
+            "validate_boundaries",
             "import_poi",
             "import_income",
             "compute_score",
@@ -201,7 +207,7 @@ DEFAULT_SETTINGS_DATA = {
         "database_srid": 4326,
     },
     "task3_score": {
-        "score_universe": "greater_sydney",
+        "score_universe": "selected_sa4",
         "min_population": 100,
         "output_scale": 100,
         "score_version": "baseline",

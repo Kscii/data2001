@@ -44,12 +44,6 @@ def clear_database(engine: Engine, settings: DatabaseSettings) -> None:
         connection.execute(text(f"TRUNCATE TABLE {table_names} RESTART IDENTITY CASCADE"))
 
 
-def count_table_rows(engine: Engine, schema: str, table_name: str) -> int:
-    """Count rows in a database table."""
-    with engine.connect() as connection:
-        return int(connection.execute(text(f"SELECT COUNT(*) FROM {schema}.{table_name}")).scalar_one())
-
-
 def check_database(engine: Engine, settings: DatabaseSettings, expected_srid: int) -> dict[str, Any]:
     """Check PostGIS, required tables, and geometry SRIDs."""
     schema = schema_name(settings)
@@ -89,4 +83,3 @@ def check_database(engine: Engine, settings: DatabaseSettings, expected_srid: in
         "bad_srids": bad_srids,
         "table_count": len(tables),
     }
-

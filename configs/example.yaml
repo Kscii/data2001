@@ -31,6 +31,7 @@ workflow:
   enabled_steps:
     - plan_import
     - import_boundaries
+    - validate_boundaries
     - import_poi
     - import_income
     - compute_score

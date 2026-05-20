@@ -5,7 +5,6 @@ from dataclasses import dataclass
 from typing import Any
 
 from data2001.config import Settings
-from data2001.task2_import.api.arcgis_client import ArcGISClient
 from data2001.task2_import.boundaries.areas import BBox, bbox_from_arcgis_geometry
 from data2001.task2_import.records import ArcGISFeature
 
@@ -49,13 +48,3 @@ def build_sa2_bbox_requests(sa2_features: list[ArcGISFeature]) -> list[POIFetchR
             )
         )
     return requests
-
-
-def fetch_poi_within_bbox(
-    client: ArcGISClient,
-    settings: Settings,
-    bbox: BBox,
-) -> list[ArcGISFeature]:
-    """作业要求的通用函数：返回一个 bbox 内的所有 POI."""
-    params = build_poi_bbox_params(settings, bbox)
-    return list(client.query_features(settings.api.layer("poi").url, params, page_size=settings.api.page_size))
