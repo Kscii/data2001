@@ -70,13 +70,13 @@ def register_dashboard_callbacks(app: Dash, engine: Engine, settings: Settings) 
             correlation = load_correlation_results(engine, settings)
         except SQLAlchemyError as exc:
             message = html.Div(f"Database query failed: {exc}", className="panel")
-            return message, kpi_cards(pd.DataFrame(), pd.DataFrame(), pd.DataFrame())
+            return message, kpi_cards(pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame())
 
         scores = filter_common(scores, sa4_names=sa4_names, sa2_codes=sa2_codes)
         score_map_areas = filter_common(score_map_areas, sa4_names=sa4_names, sa2_codes=sa2_codes)
         poi = filter_poi(poi, sa4_names=sa4_names, sa2_codes=sa2_codes, poi_groups=poi_groups)
         score_income = filter_common(score_income, sa4_names=sa4_names, sa2_codes=sa2_codes)
-        kpis = kpi_cards(scores, poi, score_income)
+        kpis = kpi_cards(scores, score_map_areas, poi, score_income)
 
         score_histogram = (
             build_score_histogram(scores, nbins=settings.charts.score_histogram_nbins)

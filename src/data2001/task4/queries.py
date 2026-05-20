@@ -63,21 +63,25 @@ def load_sa2_scores(
                 (s.sa2_code IS NULL) AS is_excluded,
                 CASE
                     WHEN s.sa2_code IS NOT NULL THEN NULL
+                    WHEN area.population IS NULL
+                        THEN 'Excluded from score: missing population'
                     WHEN area.population IS NOT NULL
                      AND area.population < :min_population
                         THEN 'Excluded from score: population below minimum threshold'
                     ELSE 'Excluded from score'
                 END AS exclusion_reason,
-                ST_AsGeoJSON(
-                    ST_Multi(ST_CollectionExtract(ST_MakeValid(area.geometry), 3))
-                )::json AS geometry
+                CAST(
+                    ST_AsGeoJSON(
+                        ST_Multi(ST_CollectionExtract(ST_MakeValid(area.geometry), 3))
+                    ) AS json
+                ) AS geometry
             FROM {schema}.sa2 area
             LEFT JOIN {schema}.sa2_score s
               ON s.sa2_code = area.sa2_code
              AND s.score_version = :score_version
              AND s.score_universe = :score_universe
             LEFT JOIN (
-                SELECT sa2_code, COUNT(*)::integer AS poi_count
+                SELECT sa2_code, CAST(COUNT(*) AS integer) AS poi_count
                 FROM {schema}.sa2_poi
                 GROUP BY sa2_code
             ) assigned_poi
@@ -104,9 +108,11 @@ def load_sa2_scores(
                 s.score_100,
                 false AS is_excluded,
                 NULL AS exclusion_reason,
-                ST_AsGeoJSON(
-                    ST_Multi(ST_CollectionExtract(ST_MakeValid(area.geometry), 3))
-                )::json AS geometry
+                CAST(
+                    ST_AsGeoJSON(
+                        ST_Multi(ST_CollectionExtract(ST_MakeValid(area.geometry), 3))
+                    ) AS json
+                ) AS geometry
             FROM {schema}.sa2_score s
             JOIN {schema}.sa2 area
               ON area.sa2_code = s.sa2_code
@@ -138,7 +144,7 @@ def load_poi_group_counts(engine: Engine, settings: Settings) -> pd.DataFrame:
         SELECT
             COALESCE(p.poigroup_name, 'Unknown') AS poigroup_name,
             p.poigroup_code,
-            COUNT(*)::integer AS poi_count
+            CAST(COUNT(*) AS integer) AS poi_count
         FROM {schema}.poi_clean p
         LEFT JOIN {schema}.sa2_poi assigned
           ON assigned.poi_objectid = p.objectid
@@ -262,8 +268,7 @@ def load_correlation_results(engine: Engine, settings: Settings) -> pd.DataFrame
             ).mappings().all()
         )
 
-
-# ── Rubric 证据 ─────────────────────────────────────────────────────────────
+# ── Database evidence ─────────────────────────────────────────────────────────
 
 
 def load_table_counts(engine: Engine, settings: Settings) -> pd.DataFrame:
@@ -329,30 +334,50 @@ def load_index_summary(engine: Engine, settings: Settings) -> pd.DataFrame:
 def load_spatial_join_summary(engine: Engine, settings: Settings) -> pd.DataFrame:
     """汇总 POI 到 SA2 的 spatial join 质量及边界重复处理情况."""
     schema = settings.database.schema_name
-    sql = text(
-        f"""
-        WITH candidates AS (
-            SELECT p.objectid, COUNT(s.sa2_code)::integer AS candidate_sa2_count
-            FROM {schema}.poi_clean p
-            JOIN {schema}.sa2 s
-              ON ST_Covers(s.geometry, p.geometry)
-            GROUP BY p.objectid
-        ),
-        assigned AS (
-            SELECT COUNT(DISTINCT poi_objectid)::integer AS assigned_poi
-            FROM {schema}.sa2_poi
-        )
-        SELECT
-            (SELECT COUNT(*)::integer FROM {schema}.poi_clean) AS clean_poi,
-            assigned.assigned_poi,
-            ((SELECT COUNT(*)::integer FROM {schema}.poi_clean) - assigned.assigned_poi) AS unassigned_poi,
-            (SELECT COUNT(*)::integer FROM candidates WHERE candidate_sa2_count > 1) AS boundary_duplicate_candidates,
-            (SELECT COUNT(*)::integer FROM {schema}.sa2_poi) AS assignment_rows
-        FROM assigned
-        """
-    )
     with engine.connect() as connection:
-        return pd.DataFrame(connection.execute(sql).mappings().all())
+        clean_poi = int(
+            connection.execute(
+                text(f"SELECT COUNT(*) FROM {schema}.poi_clean")
+            ).scalar_one()
+        )
+        assigned_poi = int(
+            connection.execute(
+                text(f"SELECT COUNT(DISTINCT poi_objectid) FROM {schema}.sa2_poi")
+            ).scalar_one()
+        )
+        assignment_rows = int(
+            connection.execute(
+                text(f"SELECT COUNT(*) FROM {schema}.sa2_poi")
+            ).scalar_one()
+        )
+        boundary_duplicate_candidates = int(
+            connection.execute(
+                text(
+                    f"""
+                    SELECT COUNT(*)
+                    FROM (
+                        SELECT p.objectid
+                        FROM {schema}.poi_clean p
+                        JOIN {schema}.sa2 s
+                          ON ST_Covers(s.geometry, p.geometry)
+                        GROUP BY p.objectid
+                        HAVING COUNT(s.sa2_code) > 1
+                    ) duplicate_candidates
+                    """
+                )
+            ).scalar_one()
+        )
+    return pd.DataFrame(
+        [
+            {
+                "clean_poi": clean_poi,
+                "assigned_poi": assigned_poi,
+                "unassigned_poi": clean_poi - assigned_poi,
+                "boundary_duplicate_candidates": boundary_duplicate_candidates,
+                "assignment_rows": assignment_rows,
+            }
+        ]
+    )
 
 
 def load_score_input_summary(engine: Engine, settings: Settings) -> pd.DataFrame:
@@ -399,31 +424,7 @@ def load_score_input_summary(engine: Engine, settings: Settings) -> pd.DataFrame
 
 def load_correlation_summary(engine: Engine, settings: Settings) -> pd.DataFrame:
     """返回最新 correlation 检验行及简洁显著性标签."""
-    schema = settings.database.schema_name
-    sql = text(
-        f"""
-        SELECT method, statistic, p_value, n, alpha, is_significant, created_at
-        FROM (
-            SELECT DISTINCT ON (method)
-                method, statistic, p_value, n, alpha, is_significant, created_at
-            FROM {schema}.score_income_correlation
-            WHERE score_version = :score_version
-              AND score_universe = :score_universe
-            ORDER BY method, created_at DESC
-        ) latest
-        ORDER BY method
-        """
-    )
-    with engine.connect() as connection:
-        result = pd.DataFrame(
-            connection.execute(
-                sql,
-                {
-                    "score_version": settings.task3_score.score_version,
-                    "score_universe": settings.task3_score.score_universe,
-                },
-            ).mappings().all()
-        )
+    result = load_correlation_results(engine, settings)
     if not result.empty:
         result["interpretation"] = result["is_significant"].map(
             {True: "statistically significant", False: "not statistically significant"}
@@ -431,7 +432,7 @@ def load_correlation_summary(engine: Engine, settings: Settings) -> pd.DataFrame
     return result
 
 
-# ── 文件系统检查 ─────────────────────────────────────────────────────────────
+# ── File evidence ─────────────────────────────────────────────────────────────
 
 
 def load_api_extraction_summary(settings: Settings) -> pd.DataFrame:
