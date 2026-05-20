@@ -1,207 +1,208 @@
-# data2001 group assignment
+# DATA2001 Group Assignment
 
 ![python](https://img.shields.io/badge/python-3.12-blue)
 ![uv](https://img.shields.io/badge/uv-managed-green)
 ![postgresql](https://img.shields.io/badge/postgresql%20%2B%20postgis-enabled-blue)
 ![dashboard](https://img.shields.io/badge/visual-dashboard-purple)
 
-## project links
+## Project Links
 
 - Dashboard: https://kscii.tech
 - Repository: https://github.sydney.edu.au/xfan0282/data2001-group-assignment
 
-## 项目依赖
+## Requirements
 
-使用本项目之前, 请确保电脑上有这些工具:
+Before running the project, make sure these tools are available:
 
-- git: 拉取代码和提交分支.
-- python3.12: 项目运行的python版本.
-- uv: python dependency manager和命令运行工具.
-- podman: 本地启动postgresql/postgis容器.
-- podman compose或docker compose: 用`compose.yml`启动数据库.
-- jupyter支持: 用于打开`notebooks/full_workflow.ipynb`.
-- chrome或kaleido管理的chrome: 用于导出report png figures.
+- git: clone the repository and work with branches.
+- python3.12: the Python version used by the project.
+- uv: Python dependency manager and command runner.
+- podman: run the local PostgreSQL/PostGIS container.
+- podman compose or docker compose: start the database from `compose.yml`.
+- Jupyter support: open and run `notebooks/full_workflow.ipynb`.
+- Chrome or Kaleido-managed Chrome: export Plotly report figures as PNG files.
 
-## quick start
+## Quick Start
 
-### 1. 安装uv和podman
+### 1. Install uv and Podman
 
-macos安装uv:
+Install uv on macOS:
 
 ```bash
-# 安装uv
+# Install uv
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# 检查uv是否可用
+# Check that uv is available
 uv --version
 ```
 
-windows powershell安装uv:
+Install uv on Windows PowerShell:
 
 ```powershell
-# 安装uv
+# Install uv
 powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 
-# 检查uv是否可用
+# Check that uv is available
 uv --version
 ```
 
-macos安装podman:
+Install Podman on macOS:
 
 ```bash
-# 安装podman
+# Install Podman
 brew install podman
 
-# 初始化并启动podman virtual machine
+# Initialise and start the Podman virtual machine
 podman machine init
 podman machine start
 
-# 检查podman是否可用
+# Check that Podman is available
 podman info
 ```
 
-windows安装podman:
+Install Podman on Windows:
 
 ```powershell
-# 使用winget安装podman
+# Install Podman with winget
 winget install RedHat.Podman
 
-# 初始化并启动podman virtual machine
+# Initialise and start the Podman virtual machine
 podman machine init
 podman machine start
 
-# 检查podman是否可用
+# Check that Podman is available
 podman info
 ```
 
-### 2. 安装python依赖和创建虚拟环境
+### 2. Install Python Dependencies
 
 ```bash
-# 仓库路径下安装python依赖并创建.venv
+# Install Python dependencies and create the .venv environment
 uv sync
 ```
 
-部分ide需要手动进入环境
+Some IDEs may require manual environment activation:
 
 ```bash
-# linux/macos
+# Linux/macOS
 source .venv/bin/activate
 ```
 
 ```powershell
-# windows powershell
+# Windows PowerShell
 .venv\Scripts\Activate.ps1
 ```
 
-### 3. 创建本地配置
+### 3. Create Local Configuration
 
 ```bash
-# 直接把example配置复制成local配置即可
+# Copy the example configuration to the local configuration path
 cp configs/example.yaml configs/local.yaml
 ```
 
-### 4. 启动postgis数据库
+### 4. Start the PostGIS Database
 
 ```bash
-# 使用compose.yml一键启动本地postgresql/postgis容器
+# Start the local PostgreSQL/PostGIS container from compose.yml
 podman compose up -d
 ```
 
 ```bash
-# 初始化schema, extension, table和index
+# Initialise schema, extensions, tables, and indexes
 uv run data2001 init-db
 
-# 检查数据库连接, postgis, table和srid
+# Check database connection, PostGIS, tables, and SRID
 uv run data2001 check-db
 ```
 
-### 5. 运行主流程
+### 5. Run the Main Workflow
 
 ```bash
-# 先查看当前配置会抓取哪些sa4, sa2和bbox
+# Preview the SA4, SA2, and bbox import plan without requesting the POI API
 uv run data2001 plan-import
 ```
 
 ```bash
-# 一键运行配置中启用的 workflow steps
+# Run the workflow steps enabled in the configuration
 uv run data2001 run-workflow
 ```
 
 ```bash
-# 生成 report 使用的 PNG charts
+# Generate PNG charts used by the report
 uv run data2001 generate-figures
 ```
 
 ```bash
-# 如果当前设备没有可用chrome, 可以让plotly/kaleido安装本地chrome
+# If no local Chrome is available, let Plotly/Kaleido install one
 uv run plotly_get_chrome
 ```
 
-### 6. 查看notebook和dashboard
+### 6. Open the Notebook and Dashboard
 
 ```text
-在ide或jupyter中打开notebooks/full_workflow.ipynb
-第一次启动要选择python解释器, 选择之前创建的虚拟环境就可以了
+Open notebooks/full_workflow.ipynb in an IDE or Jupyter.
+On first launch, select the Python interpreter from the .venv environment created by uv.
 ```
 
 ```bash
-# 本地启动visual dashboard服务器
+# Start the local visual dashboard server
 uv run data2001 dashboard
-# 然后浏览器打开终端中显示的端口
+# Then open the port printed in the terminal.
 ```
 
-部署后的 dashboard 地址:
+Deployed dashboard:
 
 ```text
 https://kscii.tech
 ```
 
-## 常用命令
+## Common Commands
 
-- `uv run data2001 init-db`: 初始化schema, extension, table, index.
-- `uv run data2001 check-db`: 检查数据库, postgis, 表和srid.
-- `uv run data2001 plan-import`: 打印将要抓取的sa4 / sa2 / bbox, 不请求poi api.
-- `uv run data2001 import-boundaries`: 抓取并入库sa2/sa4 boundary和population.
-- `uv run data2001 import-poi`: 抓取poi raw json, 并清洗入库.
-- `uv run data2001 import-income`: 抓取并入库sa2 median income.
-- `uv run data2001 compute-score`: 重新计算score和income correlation.
-- `uv run data2001 run-workflow`: 执行配置中的完整主流程.
-- `uv run data2001 generate-figures`: 导出report使用的png figures.
-- `uv run data2001 dashboard`: 启动visual dashboard.
-- `uv run data2001 clear-db --yes`: 清空业务表内容, 保留schema/table/index.
-- `uv run data2001 reset-db --yes`: 删除schema后重新初始化.
+- `uv run data2001 init-db`: initialise schema, extensions, tables, and indexes.
+- `uv run data2001 check-db`: check database connection, PostGIS, tables, and SRID.
+- `uv run data2001 plan-import`: print the planned SA4, SA2, and bbox crawl without requesting the POI API.
+- `uv run data2001 import-boundaries`: fetch and store SA2/SA4 boundaries and population.
+- `uv run data2001 validate-boundaries`: validate that imported SA2 polygons belong to their expected SA4 polygons.
+- `uv run data2001 import-poi`: fetch raw POI JSON, clean POI records, and store them in the database.
+- `uv run data2001 import-income`: fetch and store SA2 median income data.
+- `uv run data2001 compute-score`: recompute the well-resourced score and income correlation.
+- `uv run data2001 run-workflow`: run the configured end-to-end workflow.
+- `uv run data2001 generate-figures`: export PNG figures used by the report.
+- `uv run data2001 dashboard`: start the visual dashboard.
+- `uv run data2001 clear-db --yes`: clear business table contents while keeping schema, tables, and indexes.
+- `uv run data2001 reset-db --yes`: drop the schema and reinitialise the database.
 
 ```bash
-# 使用指定配置文件运行 workflow
+# Run the workflow with an explicit configuration file
 uv run data2001 --config configs/local.yaml run-workflow
 ```
 
-## 技术栈
+## Technology Stack
 
-- python3.12 + uv: dependency management和command runner.
-- pandas / numpy / scipy: data cleaning, score calculation和statistical test.
-- requests: arcgis rest api client.
-- postgresql + postgis: data import, spatial index和spatial join.
-- sqlalchemy + psycopg: python database access.
-- plotly + kaleido: notebook figures和report png.
+- python3.12 + uv: dependency management and command runner.
+- pandas / numpy / scipy: data cleaning, score calculation, and statistical tests.
+- requests: ArcGIS REST API client.
+- PostgreSQL + PostGIS: data import, spatial indexes, and spatial joins.
+- sqlalchemy + psycopg: Python database access.
+- plotly + kaleido: notebook figures and report PNG export.
 - dash: visual dashboard.
-- podman compose: 本地postgis开发环境.
+- podman compose: local PostGIS development environment.
 
-## 项目结构
+## Project Structure
 
 ```text
-configs/                    yaml配置 (task2-4 configuration)
-data/raw/task1/             task1 csv raw data
-data/raw/poi_api/           poi raw json / jsonl (task2 api extraction)
-docs/                       设计, 数据库, 容器和快速上手文档
-notebooks/                  notebook workflow (task1-4 explanation)
-report/                     final report和png figures (task4)
-sql/                        postgis schema和indexes (database schema / indexing)
-src/data2001/               python package主体
-compose.yml                 本地postgis启动入口 (data import)
+configs/                    YAML configuration for Tasks 2-4
+data/raw/task1/             Task 1 raw CSV data
+data/raw/poi_api/           POI raw JSON / JSONL output from Task 2 API extraction
+docs/                       Design, database, container, and quick-start documentation
+notebooks/                  Notebook workflow and member evidence
+report/                     Final report draft and PNG figures
+sql/                        PostGIS schema and indexes
+src/data2001/               Main Python package
+compose.yml                 Local PostGIS startup entry point
 ```
 
-核心package:
+Core package layout:
 
 ```text
 task1_cleaning/     CSV cleaning workflow (Task 1)
@@ -218,48 +219,48 @@ db/repositories/    database admin/read/write repository modules
 - [Architecture Design](docs/architecture_design.md): project structure, configuration flow, workflow steps, module boundaries, and call-chain diagrams.
 - [Database Reference](docs/database_reference.md): database tables, keys, indexes, ERD, and spatial join design.
 
-## 配置说明
+## Configuration
 
-默认配置路径:
+Default local configuration path:
 
 ```text
 configs/local.yaml
 ```
 
-仓库提供示例:
+The repository provides an example configuration:
 
 ```text
 configs/example.yaml
 ```
 
-常见需要修改的配置:
+Commonly edited settings:
 
-- `database`: 本地postgresql/postgis连接信息. (data import)
-- `task2_import.crawl_scope`: 控制抓取greater sydney, selected sa4或explicit sa4 codes. (task2 / api extraction)
-- `task2_import.selected_sa4_by_member`: 记录unikey到sa4的映射, 便于member-level analysis. (task4 / results analysis)
-- `task3_score.min_population`: 过滤人口过低的sa2. (task3 / score calculation)
-- `task3_score.score_universe`: 控制score在selected sa4集合或greater sydney内计算. (task3 / score calculation)
-- `income.min_income_earners`: 过滤income sample过小的sa2. (correlation analysis)
-- `outputs.charts_dir`: report png输出目录. (task4 / data visualisations)
+- `database`: local PostgreSQL/PostGIS connection settings.
+- `task2_import.crawl_scope`: controls whether the POI crawl uses Greater Sydney, selected SA4s, or explicit SA4 codes.
+- `task2_import.selected_sa4_by_member`: maps each member unikey to the SA4 used for member-level analysis.
+- `task3_score.min_population`: excludes very-low-population SA2 areas from score calculation.
+- `task3_score.score_universe`: controls whether scores are calculated within selected SA4s or Greater Sydney.
+- `income.min_income_earners`: filters SA2 income records with very small income samples.
+- `outputs.charts_dir`: output directory for report PNG figures.
 
-## 输出内容
+## Outputs
 
-- raw api files: `data/raw/poi_api/responses/`和`data/raw/poi_api/features.jsonl`. (task2 / api extraction)
-- database tables: `sa2`, `sa4`, `poi_clean`, `sa2_poi`, `sa2_score`, `sa2_income`, `score_income_correlation`. (database schema / spatial join / score calculation)
-- report figures: `report/figures/*.png`. (task4 / data visualisations)
-- notebook workflow: `notebooks/full_workflow.ipynb` and member notebooks under `notebooks/<unikey>/`. (task1-4 explanation)
-- final report draft: `report/report.md`. (task4 / results analysis)
+- Raw API files: `data/raw/poi_api/responses/` and `data/raw/poi_api/features.jsonl`.
+- Database tables: `sa2`, `sa4`, `poi_clean`, `sa2_poi`, `sa2_score`, `sa2_income`, and `score_income_correlation`.
+- Report figures: `report/figures/*.png`.
+- Notebook workflow: `notebooks/full_workflow.ipynb` and member notebooks under `notebooks/<unikey>/`.
+- Final report draft: `report/report.md`.
 
-## 贡献方式
+## Contributing
 
-不要直接push到主分支.建议每个功能开独立分支, 完成后创建pull request.
+Do not push directly to the main branch. Create a feature branch for each change and open a pull request after the work is ready.
 
 ```bash
-# 创建新分支
+# Create a new branch
 git checkout -b feat/your-feature
 git add <files>
 git commit -m "feat: describe your change"
 git push
 
-# 在github上检查没问题后, 再创建pull request合并到主分支.
+# After checking the branch on GitHub, open a pull request into the main branch.
 ```
