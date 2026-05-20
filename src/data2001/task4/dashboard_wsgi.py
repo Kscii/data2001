@@ -1,4 +1,3 @@
-"""Gunicorn 使用的 Dash WSGI 入口, 供容器化部署读取同一套配置."""
 from __future__ import annotations
 
 import os

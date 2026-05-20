@@ -1,4 +1,3 @@
-"""Dashboard 页面布局, 只负责控件和页面结构."""
 from __future__ import annotations
 
 from dash import html
@@ -57,7 +56,6 @@ DASH_INDEX_STRING = """
 
 
 def create_dashboard_layout(engine: Engine, settings: Settings) -> html.Div:
-    """生成 Dash 页面布局, 并用数据库现有值初始化筛选器."""
     options = initial_options(engine, settings)
     return html.Div(
         [

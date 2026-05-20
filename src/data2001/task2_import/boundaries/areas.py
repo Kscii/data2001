@@ -1,4 +1,3 @@
-"""SA4/SA2 boundary 抓取、bbox 计算和业务记录解析."""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -16,25 +15,21 @@ from data2001.task2_import.records import (
 
 @dataclass(frozen=True)
 class BBox:
-    """ArcGIS bbox 范围对象, 用于构造 envelope 查询参数."""
     minx: float
     miny: float
     maxx: float
     maxy: float
 
     def to_arcgis_envelope(self) -> str:
-        """把 bbox 转成 ArcGIS envelope 参数字符串, 用于 ArcGIS API 查询参数."""
         return f"{self.minx},{self.miny},{self.maxx},{self.maxy}"
 
 
 def _quote_values(values: list[str]) -> str:
-    """把字符串列表安全拼成 SQL IN 条件使用的值."""
     escaped = [value.replace("'", "''") for value in values]
     return ", ".join(f"'{value}'" for value in escaped)
 
 
 def selected_sa4_names(settings: Settings) -> list[str]:
-    """从 unikey -> SA4 映射中取出去重后的 SA4 名称."""
     names = [
         name.strip()
         for name in settings.task2_import.selected_sa4_by_member.values()
@@ -44,7 +39,6 @@ def selected_sa4_names(settings: Settings) -> list[str]:
 
 
 def build_sa4_where_clause(settings: Settings) -> str:
-    """根据配置决定当前需要处理哪些 SA4."""
     task2 = settings.task2_import
     if task2.crawl_scope == "greater_sydney":
         escaped_gccsa = task2.gccsa_name.replace("'", "''")
@@ -62,7 +56,6 @@ def build_sa4_where_clause(settings: Settings) -> str:
 
 
 def fetch_sa4_features(client: ArcGISClient, settings: Settings) -> list[ArcGISFeature]:
-    """从 ABS ArcGIS API 抓取当前 scope 下的 SA4 features."""
     layer = settings.api.layer("sa4")
     params = {
         "where": build_sa4_where_clause(settings),
@@ -75,7 +68,6 @@ def fetch_sa4_features(client: ArcGISClient, settings: Settings) -> list[ArcGISF
 
 
 def fetch_sa2_features_for_crawl(client: ArcGISClient, settings: Settings) -> list[ArcGISFeature]:
-    """抓取当前 scope 下的 SA2；后续 POI 按这些 SA2 的 bbox 逐个请求."""
     layer = settings.api.layer("sa2")
     sa4_where = build_sa4_where_clause(settings)
     params = {
@@ -89,7 +81,6 @@ def fetch_sa2_features_for_crawl(client: ArcGISClient, settings: Settings) -> li
 
 
 def fetch_boundaries(client: ArcGISClient, settings: Settings) -> dict[str, list[ArcGISFeature]]:
-    """请求 SA4/SA2 boundary 原始 features."""
     return {
         "sa4": fetch_sa4_features(client, settings),
         "sa2": fetch_sa2_features_for_crawl(client, settings),
@@ -97,7 +88,6 @@ def fetch_boundaries(client: ArcGISClient, settings: Settings) -> dict[str, list
 
 
 def bbox_from_arcgis_geometry(geometry: dict[str, Any]) -> BBox:
-    """从 ArcGIS polygon/point geometry 中计算 bbox."""
     if "rings" in geometry: 
         xs = [point[0] for ring in geometry["rings"] for point in ring]
         ys = [point[1] for ring in geometry["rings"] for point in ring]
@@ -110,11 +100,6 @@ def bbox_from_arcgis_geometry(geometry: dict[str, Any]) -> BBox:
 
 
 def arcgis_polygon_to_geojson(geometry: dict[str, Any]) -> dict[str, Any]:
-    """把 ArcGIS rings 转成 GeoJSON Polygon.
-
-    PostGIS 入库时会用 ST_Multi 包成 MultiPolygon.这里保留 rings 原始顺序, 
-    不在 Python 中判断内外环, 避免引入额外空间库.
-    """
     rings = geometry.get("rings")
     if not rings:
         raise ValueError("ArcGIS polygon geometry 缺少 rings")
@@ -122,7 +107,6 @@ def arcgis_polygon_to_geojson(geometry: dict[str, Any]) -> dict[str, Any]:
 
 
 def parse_boundaries(raw: dict[str, list[ArcGISFeature]]) -> BoundaryRecords:
-    """把 boundary raw features 解析成显式的 SA4/SA2 业务记录."""
     sa4_records: list[Sa4AreaRecord] = []
     for feature in raw["sa4"]:
         attrs = feature["attributes"]

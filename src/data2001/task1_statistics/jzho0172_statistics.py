@@ -1,8 +1,6 @@
 import pandas as pd
 from data2001.task1_statistics.statistic_result import StatisticResult
 
-# 返回接口使用StatisticResult中定义的dataclass的格式
-# 函数推荐命名为unikey-{统计函数编号}，如: xfan0282-1
 
 MEMBER = "jzho0172"
 

@@ -1,4 +1,3 @@
-"""POI raw JSON 文件存储：保存分页 response, 并提供 features.jsonl 流式读写."""
 from __future__ import annotations
 
 import json
@@ -11,7 +10,6 @@ from data2001.task2_import.records import ArcGISFeature, ArcGISPayload
 
 
 def prepare_poi_raw_files(settings: Settings) -> tuple[Path, Path]:
-    """准备 file_raw 输出位置, 并清掉上一次运行留下的 raw 文件."""
     response_dir = resolve_project_path(settings.outputs.raw_poi_response_dir)
     features_path = resolve_project_path(settings.outputs.raw_poi_features_jsonl)
     response_dir.mkdir(parents=True, exist_ok=True)
@@ -33,7 +31,6 @@ def write_raw_response_file(
     request_params: dict[str, Any],
     payload: ArcGISPayload,
 ) -> Path:
-    """保存单页 API response, 尽量保留请求参数和原始 payload."""
     path = response_dir / f"response_{sequence:06d}_{source_code}_{offset}.json"
     document = {
         "request_params": request_params,
@@ -44,7 +41,6 @@ def write_raw_response_file(
 
 
 def append_features_jsonl(features_path: Path, features: Iterable[ArcGISFeature]) -> int:
-    """把 raw feature 追加成 JSONL；后续清洗可以流式读取."""
     count = 0
     with features_path.open("a", encoding="utf-8") as file:
         for feature in features:
@@ -55,7 +51,6 @@ def append_features_jsonl(features_path: Path, features: Iterable[ArcGISFeature]
 
 
 def iter_features_jsonl(settings: Settings) -> Iterator[ArcGISFeature]:
-    """逐行读取 features.jsonl, 供清洗阶段流式消费."""
     features_path = resolve_project_path(settings.outputs.raw_poi_features_jsonl)
     if not features_path.exists():
         return

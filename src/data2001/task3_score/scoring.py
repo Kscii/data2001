@@ -1,4 +1,3 @@
-"""Task 3 score 公式：基于 POI count 的 z-score 和 sigmoid 变换."""
 from __future__ import annotations
 
 import math
@@ -15,7 +14,6 @@ from data2001.task3_score.records import (
 
 
 def sigmoid(value: float) -> float:
-    """计算 sigmoid, 用于把 z-score 压到 0-1 区间."""
     return 1 / (1 + math.exp(-value))
 
 
@@ -27,7 +25,6 @@ def compute_scores(
     min_population: int,
     output_scale: int,
 ) -> list[Sa2ScoreRecord]:
-    """根据每个 SA2 的 POI 数量计算 baseline score."""
     sa2_counts = score_input_records_to_dataframe(score_inputs)
     required = {"sa2_code", "poi_count", "population"}
     missing = required.difference(sa2_counts.columns)

@@ -1,9 +1,3 @@
-"""Task 4 数据加载接口, 供 notebook、export 和 dashboard 统一调用.
-
-命名规则:
-  load_*(engine, settings) → DataFrame  数据库查询
-  load_*(settings)         → DataFrame  文件系统检查（无 engine）
-"""
 from __future__ import annotations
 
 from pathlib import Path
@@ -18,7 +12,6 @@ from data2001.db.repositories.read import select_score_input
 from data2001.task2_import.boundaries.areas import selected_sa4_names
 
 
-# ── 可视化数据 ──────────────────────────────────────────────────────────────
 
 
 def _sa4_filter_sql(settings: Settings, *, table_alias: str = "area") -> str:
@@ -37,12 +30,6 @@ def load_sa2_scores(
     *,
     include_excluded: bool = False,
 ) -> pd.DataFrame:
-    """读取当前 score_universe 范围内带 SA2 geometry 的 score 数据.
-
-    When ``include_excluded`` is true, return all SA2 areas in the configured
-    map scope and mark areas that were excluded from scoring, so maps can draw
-    them as a neutral background layer without changing score calculations.
-    """
     schema = settings.database.schema_name
     sa4_filter = _sa4_filter_sql(settings)
     if include_excluded:
@@ -136,7 +123,6 @@ def load_sa2_scores(
 
 
 def load_poi_group_counts(engine: Engine, settings: Settings) -> pd.DataFrame:
-    """按当前 score_universe 范围内的 POI group 聚合 POI 数量."""
     schema = settings.database.schema_name
     sa4_filter = _sa4_filter_sql(settings)
     sql = text(
@@ -166,7 +152,6 @@ def load_poi_points(
     *,
     limit: int | None = None,
 ) -> pd.DataFrame:
-    """读取当前 score_universe 范围内的 POI 点位及其 SA2/SA4 归属信息."""
     schema = settings.database.schema_name
     limit_clause = "LIMIT :limit" if limit is not None else ""
     sa4_filter = _sa4_filter_sql(settings)
@@ -203,7 +188,6 @@ def load_poi_points(
 
 
 def load_score_income(engine: Engine, settings: Settings) -> pd.DataFrame:
-    """读取当前 score_universe 范围内 score 与 median income 已 join 的数据."""
     schema = settings.database.schema_name
     sa4_filter = _sa4_filter_sql(settings)
     sql = text(
@@ -241,7 +225,6 @@ def load_score_income(engine: Engine, settings: Settings) -> pd.DataFrame:
 
 
 def load_correlation_results(engine: Engine, settings: Settings) -> pd.DataFrame:
-    """读取 score-income correlation 检验结果."""
     schema = settings.database.schema_name
     sql = text(
         f"""
@@ -272,7 +255,6 @@ def load_correlation_results(engine: Engine, settings: Settings) -> pd.DataFrame
 
 
 def load_table_counts(engine: Engine, settings: Settings) -> pd.DataFrame:
-    """返回核心业务表的行数汇总."""
     schema = settings.database.schema_name
     rows: list[dict[str, int | str]] = []
     with engine.connect() as connection:
@@ -285,7 +267,6 @@ def load_table_counts(engine: Engine, settings: Settings) -> pd.DataFrame:
 
 
 def load_schema_summary(engine: Engine, settings: Settings) -> pd.DataFrame:
-    """返回字段级 schema 详情, 用于 report/database 证据."""
     schema = settings.database.schema_name
     sql = text(
         """
@@ -315,7 +296,6 @@ def load_schema_summary(engine: Engine, settings: Settings) -> pd.DataFrame:
 
 
 def load_index_summary(engine: Engine, settings: Settings) -> pd.DataFrame:
-    """返回 PostgreSQL index 定义, 用于 indexing rubric 证据."""
     schema = settings.database.schema_name
     sql = text(
         """
@@ -332,7 +312,6 @@ def load_index_summary(engine: Engine, settings: Settings) -> pd.DataFrame:
 
 
 def load_spatial_join_summary(engine: Engine, settings: Settings) -> pd.DataFrame:
-    """汇总 POI 到 SA2 的 spatial join 质量及边界重复处理情况."""
     schema = settings.database.schema_name
     with engine.connect() as connection:
         clean_poi = int(
@@ -381,7 +360,6 @@ def load_spatial_join_summary(engine: Engine, settings: Settings) -> pd.DataFram
 
 
 def load_score_input_summary(engine: Engine, settings: Settings) -> pd.DataFrame:
-    """汇总 z-score/sigmoid 计算前的 score input 行."""
     rows = select_score_input(
         engine,
         settings.database.schema_name,
@@ -423,7 +401,6 @@ def load_score_input_summary(engine: Engine, settings: Settings) -> pd.DataFrame
 
 
 def load_correlation_summary(engine: Engine, settings: Settings) -> pd.DataFrame:
-    """返回最新 correlation 检验行及简洁显著性标签."""
     result = load_correlation_results(engine, settings)
     if not result.empty:
         result["interpretation"] = result["is_significant"].map(
@@ -436,7 +413,6 @@ def load_correlation_summary(engine: Engine, settings: Settings) -> pd.DataFrame
 
 
 def load_api_extraction_summary(settings: Settings) -> pd.DataFrame:
-    """汇总 Task 2 API 抓取产生的原始 POI 文件."""
     response_dir = resolve_project_path(settings.outputs.raw_poi_response_dir)
     features_path = resolve_project_path(settings.outputs.raw_poi_features_jsonl)
     response_files = (
@@ -465,7 +441,6 @@ def load_api_extraction_summary(settings: Settings) -> pd.DataFrame:
 
 
 def expected_report_figure_paths(settings: Settings) -> pd.DataFrame:
-    """列出 Task 4 export 步骤预期生成的 report 图片文件."""
     charts_dir = resolve_project_path(settings.outputs.charts_dir)
     file_names = [
         "score_histogram.png",
