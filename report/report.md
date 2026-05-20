@@ -61,9 +61,10 @@ The selected SA4 scope is configured in `configs/local.yaml`. SA2 counts should 
 | Member name | Unikey | Selected SA4 | SA2 count |
 | --- | --- | --- | --- |
 | Xuejian Fang | xfan0282 | Sydney - City and Inner South | 27 |
-| TODO | dabi0142 | Sydney - Parramatta | TODO |
+| Daniel Kaiqi Bi | dabi0142 | Sydney - Parramatta | 34 |
 | TODO | jzho0172 | Sydney - North Sydney and Hornsby | TODO |
 | Xuanhao Yu | xuyu8020 | Sydney - Northern Beaches | 19 |
+
 
 All selected SA4 areas are within Greater Sydney. The current configuration uses `task2_import.crawl_scope: selected_sa4` and `task3_score.score_universe: selected_sa4`, so the score distribution is calculated over the selected member SA4 set rather than every SA2 in Greater Sydney.
 
@@ -78,8 +79,8 @@ Each member's complete five derived statistics are provided in `task1_statistics
 | Member | Selected derived statistic | Result summary | Why it matters |
 | --- | --- | --- | --- |
 | xfan0282 | Work-from-home growth and public transport commute decline | Work-from-home share grew 6.42x from 4.82% to 30.98%; public transport commute share dropped by 11.98 percentage points from 15.98% to 4.00%. | These findings show a major change in commuting behaviour and provide context for interpreting transport resources, POI patterns, and accessibility. |
-| dabi0142 | TODO | TODO | TODO |
-| jzho0172 | TODO | TODO | TODO |
+| dabi0142 | Population growth rate, working-age population percentage, unemployment rate change, most volatile indicator, longest increase streak | NSW population growth result was negative in the output, working-age population was around 64.7%, unemployment had a largest yearly change of -2.3 percentage points, and one indicator showed a 5-year increase streak.  | These statistics help show long-term demographic and labour market patterns in NSW, while also highlighting possible data quality or indicator selection issues. |
+| jzho0172 | Population growth and demographic structure | Estimated resident population grew by 5.38% from 2019 to 2024. Population density increased by 0.60 persons/km², and females made up 50.26% of the 2024 population. | These findings show recent population growth and demographic balance in NSW, which provides useful context for interpreting demand for services and POI-based resource scores. |
 | xuyu8020 | Population structure, gender balance, income growth, income distribution, and business dynamics | NSW had an age dependency ratio of 54.44 dependents per 100 working-age persons in 2024. The sex ratio was 98.98 males per 100 females. Median total income increased by 15.16% from 2018 to 2022, while mean total income was 37.03% higher than median income in 2022. The business net entry rate was 2.95% of total businesses in 2024. | These statistics provide demographic and economic context for later resource analysis. Population structure may affect service demand, income statistics help describe economic conditions, and business entry-exit patterns indicate local economic activity. |
 
 TODO: 添加一段简短的小组层面总结，说明 Task 1 的发现如何支持 POI score 分析、SA4 对比或局限性讨论。
@@ -126,13 +127,13 @@ Task 2 first reads the selected SA4 scope from the configuration, fetches the SA
 Bbox extraction only returns candidate POIs because a rectangular bbox can include points outside the actual SA2 polygon. Final assignment uses `ST_Covers(sa2.geometry, poi_clean.geometry)` and writes the result to `sa2_poi`. If one POI matches multiple SA2 polygons on a boundary, the deterministic rule keeps the first `sa2_code` in ascending order.
 
 | Evidence item | Value |
-| --- | --- |
-| Response files | 106 |
+| --- |-------|
+| Response files | 106   |
 | Raw feature rows | 16468 |
-| Clean POI rows | TODO |
-| Assigned POI rows | TODO |
-| Unassigned POI rows | TODO |
-| Boundary duplicate candidates | TODO |
+| Clean POI rows | 2365  |
+| Assigned POI rows | 2086  |
+| Unassigned POI rows | 279   |
+| Boundary duplicate candidates | 0     |
 
 ## Score Calculation Method
 
@@ -218,15 +219,18 @@ The POI group distribution is dominated by Recreation, followed by Community and
 
 TODO: 报告 Pearson 和 Spearman 的 statistic、p-value、n、alpha 和 significance。数值必须来自 `score_income_correlation` 或 notebook output。
 
-| Method | Statistic | p-value | n | Significant? | TODO: 解释 |
-| --- | --- | --- | --- | --- | --- |
-| Pearson | TODO | TODO | TODO | TODO | TODO |
-| Spearman | TODO | TODO | TODO | TODO | TODO |
+| Method | Statistic | p-value | n    | Significant? | TODO: 解释 |
+| --- | --- | --- |------|-------| --- |
+| Pearson | 0.197362 | 0.287228 | 31   | False |  Weak positive linear relationship, but not statistically significant. |
+| Spearman | 0.226347 | 0.220793 | 31 | No | Weak positive monotonic relationship, but not statistically significant. |
 
 TODO: 解释 score 和 median income 是否存在统计显著关系。即使显著，也需要说明相关性不等于因果关系。
 
 TODO: 如果关系较弱或不显著，解释可能原因，例如 POI 位置、城市密度、土地使用、交通枢纽、income 数据年份或 SA2 聚合效应。
-
+The correlation analysis suggests that there was only a weak positive relationship between well-resourced scores and median income across the selected SA2 regions. Both Pearson and Spearman tests produced positive correlation values, but the p-values were greater than the selected significance level of 0.05. This means the relationship was not statistically significant in this dataset.
+The results indicate that higher-income areas did not always achieve substantially higher accessibility scores. Several middle-income regions still recorded relatively strong scores because of higher concentrations of transport, recreation, and community facilities.
+There are several possible reasons why the relationship appeared weak. Accessibility scores were mainly based on POI distribution rather than service quality or transport efficiency. Urban density, commercial concentration, land use patterns, and transport hubs may also influence resource accessibility independently from household income levels. In addition, the analysis relied on aggregated SA2-level data and external API datasets, which may not fully capture local accessibility differences between smaller neighbourhoods.
+Even if a stronger relationship had been observed, correlation alone would not demonstrate a direct causal relationship between median income and accessibility scores.
 ## Limitations and Further Work
 
 - POI count does not distinguish service quality, size, capacity, opening hours, or actual resident accessibility.
