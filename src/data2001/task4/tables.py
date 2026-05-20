@@ -1,4 +1,3 @@
-"""Notebook 和 Dash 共用的表格数据整理函数."""
 from __future__ import annotations
 
 from typing import Any, cast
@@ -7,7 +6,6 @@ import pandas as pd
 
 
 def build_top_bottom_table(scores_df: pd.DataFrame, *, n: int) -> pd.DataFrame:
-    """整理 Top N 和 Bottom N SA2 score 表格."""
     columns = ["sa2_code", "sa2_name", "sa4_name", "poi_count", "score_100", "population"]
     top = scores_df.nlargest(n, "score_100").copy()
     top["rank_group"] = "top"
@@ -17,7 +15,6 @@ def build_top_bottom_table(scores_df: pd.DataFrame, *, n: int) -> pd.DataFrame:
 
 
 def build_sa4_summary_table(scores_df: pd.DataFrame, poi_df: pd.DataFrame) -> pd.DataFrame:
-    """整理 SA4 层面的 score 和 POI 汇总表."""
     columns = [
         "sa4_name",
         "sa2_count",

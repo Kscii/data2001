@@ -1,4 +1,3 @@
-"""Task 3 workflow, 负责计算 SA2 score 并执行收入相关性检验."""
 from __future__ import annotations
 
 from sqlalchemy import Engine
@@ -18,7 +17,6 @@ from data2001.task3_score.scoring import compute_scores
 
 
 def run_score_calculation(engine: Engine, settings: Settings) -> list[Sa2ScoreRecord]:
-    """读取 score 输入数据, 计算 SA2 score, 并写回 sa2_score 表."""
     rows = select_score_input(
         engine,
         settings.database.schema_name,
@@ -38,7 +36,6 @@ def run_score_calculation(engine: Engine, settings: Settings) -> list[Sa2ScoreRe
 
 
 def run_task3_score_workflow(engine: Engine, settings: Settings) -> StepSummary:
-    """依次重新计算 score 和 score-income correlation."""
     scores = run_score_calculation(engine, settings)
     correlations = compute_income_correlation(engine, settings)
     return {

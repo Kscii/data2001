@@ -1,4 +1,3 @@
-"""Score 与 median income 的相关性检验逻辑."""
 from __future__ import annotations
 
 from typing import Any, cast
@@ -19,7 +18,6 @@ from data2001.task3_score.records import (
 
 
 def _to_float(value: int | float | None) -> float | None:
-    """把数据库数值统一成 float；空值继续保留为空."""
     if value is None:
         return None
     return float(value)
@@ -31,7 +29,6 @@ def prepare_score_income_sample(
     min_population: int,
     min_income_earners: int,
 ) -> list[ScoreIncomeSampleRecord]:
-    """保留有 score、median income 且样本量足够的 SA2."""
     sample: list[ScoreIncomeSampleRecord] = []
     for record in records:
         score = _to_float(record.score)
@@ -52,7 +49,6 @@ def test_score_income_correlation(
     method: str,
     alpha: float,
 ) -> CorrelationResult:
-    """对 score 和 median income 执行 Pearson 或 Spearman 检验."""
     if len(sample) < 3:
         raise ValueError("correlation test 至少需要 3 个 SA2")
 
@@ -78,7 +74,6 @@ def test_score_income_correlation(
 
 
 def compute_income_correlation(engine: Engine, settings: Settings) -> list[CorrelationResult]:
-    """重新计算 score 和 median income 的 Pearson/Spearman correlation."""
     rows = select_score_income_sample(
         engine,
         settings.database.schema_name,

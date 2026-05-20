@@ -1,8 +1,6 @@
-"""项目路径常量和相对路径解析工具."""
 from pathlib import Path
 
 
-# 从当前文件向上回到仓库根目录：src/data2001/common/paths.py
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 CONFIG_DIR = PROJECT_ROOT / "configs"
 DATA_DIR = PROJECT_ROOT / "data"
@@ -18,7 +16,6 @@ DEFAULT_CONFIG_PATH = CONFIG_DIR / "local.yaml"
 
 
 def resolve_project_path(path: str | Path) -> Path:
-    """把相对路径解析成基于项目根目录的绝对路径."""
     candidate = Path(path)
     if candidate.is_absolute():
         return candidate

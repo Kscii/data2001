@@ -12,12 +12,12 @@ from data2001.task1_statistics import (
 from data2001.task1_statistics.statistic_result import StatisticResult
 
 EXPECTED_COLUMNS = [
-    "member", # 你的unikey
-    "statistic_id", # 统计函数的id, 按照要求每个人实现5个统计函数, 命名使用"unikey-{函数编号}" 如: xfan0282-1
-    "title", # 这个统计项的实际含义
-    "value", # 统计结果的值
-    "unit", # 统计结果的单位
-    "description", # 统计项的解释文本, 用于在ipynb的notebook中展示, 是可选参数
+    "member",
+    "statistic_id",
+    "title",
+    "value",
+    "unit",
+    "description",
 ]
 
 STATISTIC_FUNCTIONS = []

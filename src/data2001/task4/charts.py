@@ -1,4 +1,3 @@
-"""Notebook、report 和 Dash 共用的 Plotly 统计图构建函数."""
 from __future__ import annotations
 
 from typing import Any, cast
@@ -10,7 +9,6 @@ import plotly.graph_objects as go
 
 
 def build_score_histogram(scores_df: pd.DataFrame, *, nbins: int) -> go.Figure:
-    """构建 SA2 score 分布直方图."""
     fig = px.histogram(
         scores_df,
         x="score_100",
@@ -23,7 +21,6 @@ def build_score_histogram(scores_df: pd.DataFrame, *, nbins: int) -> go.Figure:
 
 
 def build_top_sa2_bar(scores_df: pd.DataFrame, *, n: int) -> go.Figure:
-    """构建 score 最高的 Top N SA2 横向柱状图."""
     data = (
         scores_df.sort_values(
             ["score_100", "sa4_name", "sa2_name"],
@@ -46,7 +43,6 @@ def build_top_sa2_bar(scores_df: pd.DataFrame, *, n: int) -> go.Figure:
 
 
 def build_bottom_sa2_bar(scores_df: pd.DataFrame, *, n: int) -> go.Figure:
-    """构建 score 最低的 Bottom N SA2 横向柱状图."""
     data = (
         scores_df.sort_values(
             ["score_100", "sa4_name", "sa2_name"],
@@ -69,7 +65,6 @@ def build_bottom_sa2_bar(scores_df: pd.DataFrame, *, n: int) -> go.Figure:
 
 
 def build_poi_group_distribution(group_df: pd.DataFrame) -> go.Figure:
-    """构建 POI group 数量分布图."""
     fig = px.bar(
         group_df.sort_values("poi_count"),
         x="poi_count",
@@ -82,7 +77,6 @@ def build_poi_group_distribution(group_df: pd.DataFrame) -> go.Figure:
 
 
 def build_sa4_score_boxplot(scores_df: pd.DataFrame) -> go.Figure:
-    """构建按 SA4 分组的 SA2 score 箱线图."""
     fig = px.box(
         scores_df,
         x="sa4_name",
@@ -96,7 +90,6 @@ def build_sa4_score_boxplot(scores_df: pd.DataFrame) -> go.Figure:
 
 
 def build_poi_group_by_sa4_bar(poi_df: pd.DataFrame) -> go.Figure:
-    """构建各 SA4 的 POI group 组成堆叠柱状图."""
     grouped = cast(Any, poi_df.groupby(["sa4_name", "poigroup_name"], dropna=False).size())
     grouped = cast(pd.DataFrame, grouped.reset_index(name="poi_count"))
     grouped = cast(pd.DataFrame, grouped.sort_values(by=["sa4_name", "poigroup_name"]))
@@ -113,7 +106,6 @@ def build_poi_group_by_sa4_bar(poi_df: pd.DataFrame) -> go.Figure:
 
 
 def build_score_income_scatter(score_income_df: pd.DataFrame) -> go.Figure:
-    """构建 score 与 median income 的散点图."""
     fig = px.scatter(
         score_income_df,
         x="median_income_2022_23",
