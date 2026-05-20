@@ -6,53 +6,23 @@ from data2001.task1_statistics.statistic_result import StatisticResult
 MEMBER = "xuyu8020"
 
 
-def _measure_code_column(df: pd.DataFrame) -> str:
-    if "measure_code" in df.columns:
-        return "measure_code"
-
-    if "Measure Code" in df.columns:
-        return "Measure Code"
-
-    raise KeyError("Task 1 data is missing a measure code column")
-
-
 def _value(df: pd.DataFrame, measure_code: str, year: int) -> float:
-    code_column = _measure_code_column(df)
+    required_columns = {"measure_code", "year", "value"}
+    missing = required_columns.difference(df.columns)
+    if missing:
+        raise KeyError(f"Task 1 cleaned data is missing columns: {sorted(missing)}")
 
-    if {"year", "value"}.issubset(df.columns):
-        years = pd.to_numeric(df["year"], errors="coerce")
-        rows = df[
-            (df[code_column] == measure_code)
-            & (years == year)
-        ]
+    rows = df[
+        (df["measure_code"] == measure_code)
+        & (pd.to_numeric(df["year"], errors="coerce") == year)
+    ]
+    if rows.empty:
+        raise KeyError(f"Missing value for {measure_code} in {year}")
 
-        if rows.empty:
-            raise KeyError(f"Missing value for {measure_code} in {year}")
-
-        value = pd.to_numeric(
-            rows.iloc[0]["value"],
-            errors="coerce"
-        )
-
-    else:
-        year_column = str(year)
-
-        if year_column not in df.columns:
-            raise KeyError(f"Task 1 data is missing year column {year_column}")
-
-        rows = df[df[code_column] == measure_code]
-
-        if rows.empty:
-            raise KeyError(f"Missing measure {measure_code}")
-
-        value = pd.to_numeric(
-            rows.iloc[0][year_column],
-            errors="coerce"
-        )
+    value = pd.to_numeric(rows.iloc[0]["value"], errors="coerce")
 
     if pd.isna(value):
         raise ValueError(f"Value for {measure_code} in {year} is empty")
-
     return float(value)
 
 
@@ -197,10 +167,3 @@ STATISTICS = [
     xuyu8020_4,
     xuyu8020_5,
 ]
-
-
-def get_xuyu8020_statistics(df: pd.DataFrame) -> list[StatisticResult]:
-    return [
-        statistic(df)
-        for statistic in STATISTICS
-    ]

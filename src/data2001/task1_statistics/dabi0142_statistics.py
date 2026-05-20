@@ -227,10 +227,3 @@ STATISTICS = [
     dabi0142_4,
     dabi0142_5,
 ]
-
-
-def get_dabi0142_statistics(df: pd.DataFrame) -> list[StatisticResult]:
-    return [
-        statistic(df)
-        for statistic in STATISTICS
-    ]
