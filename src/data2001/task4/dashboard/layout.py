@@ -79,7 +79,7 @@ def create_dashboard_layout(engine: Engine, settings: Settings) -> html.Div:
                                 id="sa2-filter",
                                 options=options["sa2"],
                                 multi=True,
-                                placeholder="All SA2 regions",
+                                placeholder="All SA2 areas",
                             ),
                             html.Div("POI group", className="control-label"),
                             Dropdown(

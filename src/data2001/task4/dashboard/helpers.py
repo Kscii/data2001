@@ -148,16 +148,21 @@ def correlation_summary(correlation: pd.DataFrame) -> str:
     return f"Statistically significant relationship found for: {methods}."
 
 
-def kpi_cards(scores: pd.DataFrame, poi_df: pd.DataFrame, score_income: pd.DataFrame) -> list[html.Div]:
+def kpi_cards(
+    scores: pd.DataFrame,
+    score_areas: pd.DataFrame,
+    poi_df: pd.DataFrame,
+    score_income: pd.DataFrame,
+) -> list[html.Div]:
     """根据当前筛选结果生成顶部 KPI 卡片."""
     values = [
-        ("SA2 regions", len(scores)),
+        ("SA2 areas", len(score_areas)),
         ("Assigned POI", len(poi_df)),
         (
-            "Mean score",
+            "Mean score (scored SA2)",
             f"{float(cast(Any, cast(pd.Series, scores['score_100']).mean())):.1f}" if not scores.empty else "n/a",
         ),
-        ("Income sample", len(score_income)),
+        ("Income sample (scored)", len(score_income)),
     ]
     return [
         html.Div(
@@ -211,7 +216,7 @@ def unique_options(df: pd.DataFrame, column: str) -> list[dict[str, Any]]:
 
 def initial_options(engine: Engine, settings: Settings) -> dict[str, list[dict[str, Any]]]:
     """页面首次加载时从数据库读取筛选器候选值."""
-    scores = safe_load(pd.DataFrame(), lambda: load_sa2_scores(engine, settings))
+    scores = safe_load(pd.DataFrame(), lambda: load_sa2_scores(engine, settings, include_excluded=True))
     poi = safe_load(pd.DataFrame(), lambda: load_poi_points(engine, settings, limit=settings.dashboard.poi_limit))
     return {
         "sa4": unique_options(scores, "sa4_name"),
