@@ -62,7 +62,7 @@ The selected SA4 scope is configured in `configs/local.yaml`. SA2 counts should 
 | --- | --- | --- | --- |
 | Xuejian Fang | xfan0282 | Sydney - City and Inner South | 27 |
 | TODO | dabi0142 | Sydney - Parramatta | TODO |
-| jzho0172 | Population growth and demographic structure | Estimated resident population grew by 5.38% from 2019 to 2024. Population density increased by 0.60 persons/km², and females made up 50.26% of the 2024 population. | These findings show recent population growth and demographic balance in NSW, which provides useful context for interpreting demand for services and POI-based resource scores. |
+| TODO | jzho0172 | Sydney - North Sydney and Hornsby | TODO |
 | TODO | xuyu8020 | Sydney - Northern Beaches | TODO |
 
 All selected SA4 areas are within Greater Sydney. The current configuration uses `task2_import.crawl_scope: selected_sa4` and `task3_score.score_universe: selected_sa4`, so the score distribution is calculated over the selected member SA4 set rather than every SA2 in Greater Sydney.
@@ -71,7 +71,7 @@ All selected SA4 areas are within Greater Sydney. The current configuration uses
 
 The Task 1 cleaning workflow is shown in `full_workflow.ipynb`, Section 2: Task 1 CSV Loading, Cleaning, and Derived Statistics. The raw CSV is cleaned once and then reused as the common input for each member's derived statistics.
 
-The implemented cleaning steps standardise column names, standardise text-based columns, extract unit information, handle missing values and duplicate rows, convert year columns into numeric values, detect outliers, reshape the dataset into long format, and remove rows with missing observations. The text standardisation step trims extra whitespace and converts empty strings into missing values, improving consistency in measure codes, descriptions, and units before later analysis.
+The implemented cleaning steps standardise column names, standardise text columns, extract unit information, handle missing values and duplicate rows, convert year columns into numeric values, detect outliers, reshape the dataset into long format, and remove rows with missing observations.
 
 Each member's complete five derived statistics are provided in `task1_statistics.ipynb`, Section: Individual Derived Statistics. The report should only highlight selected findings that support the group-level analysis.
 
@@ -80,9 +80,11 @@ Each member's complete five derived statistics are provided in `task1_statistics
 | xfan0282 | Work-from-home growth and public transport commute decline | Work-from-home share grew 6.42x from 4.82% to 30.98%; public transport commute share dropped by 11.98 percentage points from 15.98% to 4.00%. | These findings show a major change in commuting behaviour and provide context for interpreting transport resources, POI patterns, and accessibility. |
 | dabi0142 | TODO | TODO | TODO |
 | jzho0172 | TODO | TODO | TODO |
-| xuyu8020 | TODO | TODO | TODO |
+| xuyu8020 | Population structure, gender balance, income growth, income distribution, and business dynamics | NSW had an age dependency ratio of 54.44 dependents per 100 working-age persons in 2024. The sex ratio was 98.98 males per 100 females. Median total income increased by 15.16% from 2018 to 2022, while mean total income was 37.03% higher than median income in 2022. The business net entry rate was 2.95% of total businesses in 2024. | These statistics provide demographic and economic context for later resource analysis. Population structure may affect service demand, income statistics help describe economic conditions, and business entry-exit patterns indicate local economic activity. |
 
 TODO: 添加一段简短的小组层面总结，说明 Task 1 的发现如何支持 POI score 分析、SA4 对比或局限性讨论。
+
+Overall, the Task 1 findings provide useful context for the later POI-based resource analysis. The commuting-related statistics show that patterns of work and transport use changed substantially between 2016 and 2021, which is relevant when interpreting transport and community POIs. The demographic and income statistics show that NSW has both service demand pressures and economic variation, which helps explain why a simple POI count should be interpreted carefully. These findings support the later analysis by showing that resource distribution is not only a geographic issue, but also connected to population structure, income patterns, business activity, and changing mobility behaviour.
 
 ## Database Schema and Indexing
 
@@ -125,8 +127,8 @@ Bbox extraction only returns candidate POIs because a rectangular bbox can inclu
 
 | Evidence item | Value |
 | --- | --- |
-| Response files | TODO: 从 `full_workflow.ipynb`, Section 5 或数据库 summary output 中填写 |
-| Raw feature rows | TODO |
+| Response files | 106 |
+| Raw feature rows | 16468 |
 | Clean POI rows | TODO |
 | Assigned POI rows | TODO |
 | Unassigned POI rows | TODO |
@@ -160,19 +162,27 @@ The figures below provide the report-level interpretation of the score results. 
 
 TODO: 解释 score 分布形状、主要集中区间、偏态，以及明显高分或低分的 SA2。
 
+The score histogram shows that most SA2 regions fall within the lower-to-middle score range, especially around 30 to 55. The distribution is right-skewed, with fewer SA2s receiving very high scores above 80. This suggests that highly resourced SA2s are relatively uncommon within the selected SA4 scope. Most areas have moderate POI availability, while a small number of areas contain much denser POI concentrations and therefore receive much higher scores.
+
 ### Spatial Pattern of Scores
 
 ![SA2 score choropleth map](figures/sa2_score_choropleth.png)
 
 TODO: 解释高分和低分是否集中在特定 SA4、城市中心、沿海区域、郊区边缘或其他空间模式中。不要只描述颜色。
 
+The score map shows that high-scoring SA2s are not evenly distributed across the selected regions. Several higher-score areas appear around more urbanised or activity-centre locations, while lower-score areas are more common in less dense or more residential parts of the selected SA4s. The Northern Beaches and North Sydney and Hornsby areas contain several high-scoring SA2s, while parts of Parramatta and City and Inner South show more mixed results. This indicates that POI concentration is strongly spatial rather than randomly distributed.
+
 ![Population-adjusted POI density map](figures/poi_density_choropleth.png)
 
 TODO: 比较 score map 和 population-adjusted POI density map，说明按人口调整后哪些 SA2 仍然较高，哪些区域的 raw POI count 可能受到人口规模、土地使用或特殊 POI cluster 的影响。
 
+The population-adjusted POI density map provides a different interpretation from the raw score map. Some SA2s with high raw POI counts may not appear as strong after adjusting by population, because their larger resident base reduces POI density per person. In contrast, some lower-population areas can appear relatively high on the density map even if their raw POI count is not among the highest.
+
 ![POI point scatter map](figures/poi_point_scatter.png)
 
 TODO: 解释 POI 点位分布，包括线性、聚集、交通相关、沿海或商业区模式，并说明这些模式如何影响 SA2 层面的 score。
+
+The POI point map shows clear clustering rather than an even spread of facilities. POIs are concentrated around urban centres, coastal activity areas, transport corridors, and commercial or community hubs. This clustering helps explain why nearby SA2s can receive very different scores: the score depends not only on the size of the SA2, but also on whether major POI clusters fall inside its boundary. It also confirms why the final polygon spatial join is necessary after bbox extraction.
 
 ### Highest and Lowest Scoring SA2s
 
@@ -182,17 +192,25 @@ TODO: 解释 POI 点位分布，包括线性、聚集、交通相关、沿海或
 
 TODO: 解释最高分和最低分 SA2 的共同特征，并把解释和 POI count、SA4 位置、人口或土地使用背景联系起来。
 
+The highest-scoring SA2s include areas such as Sydenham - Tempe - St Peters, Sydney (North) - Millers Point, Newport - Bilgola, Bayview - Elanora Heights, Avalon - Palm Beach, and Manly - Fairlight. These areas are likely to contain dense clusters of recreation, community, transport, or activity-centre POIs. Northern Beaches and North Sydney and Hornsby appear frequently among the top-scoring SA2s, suggesting strong internal POI concentration in these SA4s.
+
+The lowest-scoring SA2s include areas such as Dee Why (South) - North Curl Curl, South Wentworthville, Berala, Auburn - North, Parramatta - South, and Banksmeadow. These lower scores may reflect fewer recorded POIs inside the SA2 boundary, more residential land use, or POIs being concentrated in neighbouring SA2s instead. The comparison between top and bottom SA2s shows that resource scores are highly sensitive to local land use and POI clustering.
+
 ### SA4-Level Comparison
 
 ![SA4 score boxplot](figures/sa4_score_boxplot.png)
 
 TODO: 解释各 SA4 的 median、spread、range 和 outlier，并说明哪个 SA4 内部差异更大、哪个更集中。
 
+The SA4 boxplot shows clear differences between the selected SA4 regions. Sydney - North Sydney and Hornsby and Sydney - Northern Beaches have relatively high median scores and wide score ranges, indicating that they contain both moderately resourced and highly resourced SA2s. Sydney - City and Inner South has a lower central tendency but includes extreme high-score outliers, suggesting that a few inner-city activity centres contain very dense POI clusters. Sydney - Parramatta shows a broad distribution but generally lower scores than the strongest North Sydney and Northern Beaches areas.
+
 ### POI Group Composition
 
 ![POI group distribution](figures/poi_group_distribution.png)
 
 TODO: 解释哪些 POI group 占主导、哪些 group 较少，以及 POI group 组成是否可能影响 score 的解释。
+
+The POI group distribution is dominated by Recreation, followed by Community and Transport. Education and Place also contribute a noticeable number of POIs, while Landform, Hydrography, Utility, and Industry appear much less frequently. This composition matters because the baseline score treats all POIs equally. As a result, SA2s with many recreation or community POIs may receive higher scores even if they do not necessarily have stronger access to essential services such as health, education, or transport.
 
 ## Correlation with Median Income
 
@@ -269,4 +287,6 @@ TODO: contribution summary。
 - jzho0172
   - TODO
 - xuyu8020
-  - TODO
+   - Implemented additional Task 1 cleaning steps, including removal of missing long-format observations
+   - Implemented five Task 1 derived statistics covering age dependency, sex ratio, income growth, income distribution, and business net entry rate.
+   - Worked on the Sydney - Northern Beaches SA4 scope for Task 2 and Task 3 analysis.
