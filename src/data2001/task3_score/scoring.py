@@ -36,7 +36,7 @@ def compute_scores(
 
     df = sa2_counts.copy()
     population = cast(pd.Series, pd.to_numeric(df["population"], errors="coerce"))
-    population_mask = cast(pd.Series, population.isna() | (population >= min_population))
+    population_mask = cast(pd.Series, population >= min_population)
     df = cast(pd.DataFrame, df.loc[population_mask].copy())
 
     poi_count = cast(pd.Series, pd.to_numeric(df["poi_count"], errors="coerce"))

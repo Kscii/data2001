@@ -48,6 +48,7 @@
 | `check-db` | `check_db` | no | `run_check_db_step` | Checks connection, PostGIS, tables, and SRID. |
 | `plan-import` | `plan_import` | no | `run_plan_import_step` | Returns SA4, SA2, and bbox request counts. |
 | `import-boundaries` | `import_boundaries` | no | `run_import_boundaries_step` | Writes `sa4`, `sa2`, and population fields. |
+| `validate-boundaries` | `validate_boundaries` | no | `run_validate_boundaries_step` | Validates SA2 polygons against their parent SA4 polygons. |
 | `import-poi` | `import_poi` | no | `run_import_poi_step` | Persists raw POI, writes `poi_clean`, and writes `sa2_poi`. |
 | `import-income` | `import_income` | no | `run_import_income_step` | Writes `sa2_income`. |
 | `compute-score` | `compute_score` | no | `run_compute_score_step` | Writes `sa2_score` and `score_income_correlation`. |
@@ -62,6 +63,7 @@
 ```text
 plan_import
 import_boundaries
+validate_boundaries
 import_poi
 import_income
 compute_score
@@ -82,7 +84,7 @@ compute_score
 | `task1_cleaning` | CSV cleaning steps. | Input/output is Pandas DataFrame. |
 | `task1_statistics` | Member derived statistics. | Outputs `StatisticResult` rows. |
 | `task2_import/api` | ArcGIS client and metadata validation. | Does not know business tables. |
-| `task2_import/boundaries` | SA4/SA2 scope, bbox, and population import. | Produces boundary records and writes them. |
+| `task2_import/boundaries` | SA4/SA2 scope, bbox, population import, and SA2-to-SA4 validation. | Produces boundary records, writes them, and validates membership. |
 | `task2_import/poi` | POI bbox requests, raw files, cleaning, and spatial assignment. | Raw files plus `poi_clean` / `sa2_poi`. |
 | `task2_import/income` | Income API extraction and loading. | Writes `sa2_income`. |
 | `task3_score` | Score formula and income correlation. | Writes `sa2_score` and `score_income_correlation`. |

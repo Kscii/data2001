@@ -2,41 +2,30 @@ import pandas as pd
 
 from data2001.task1_statistics.statistic_result import StatisticResult
 
-# 返回接口使用StatisticResult中定义的dataclass的格式
-# 函数推荐命名为unikey-{统计函数编号}，如: xfan0282-1
+# Each statistic returns the shared StatisticResult dataclass.
+# Function names follow the member/statistic id pattern, for example xfan0282_1.
 
 
 MEMBER = "xfan0282"
 
 
-def _measure_code_column(df: pd.DataFrame) -> str:
-    if "measure_code" in df.columns:
-        return "measure_code"
-    if "Measure Code" in df.columns:
-        return "Measure Code"
-    raise KeyError("Task 1 data is missing a measure code column")
-
-
 def _value(df: pd.DataFrame, measure_code: str, year: int) -> float:
-    """Read one measure/year value from either raw wide data or cleaned long data."""
-    code_column = _measure_code_column(df)
+    """Read one measure/year value from the shared cleaned long dataframe."""
+    # The statistics depend on the shared long-format cleaning output.
+    required_columns = {"measure_code", "year", "value"}
+    missing = required_columns.difference(df.columns)
+    if missing:
+        raise KeyError(f"Task 1 cleaned data is missing columns: {sorted(missing)}")
 
-    if {"year", "value"}.issubset(df.columns):
-        rows = df[
-            (df[code_column] == measure_code)
-            & (pd.to_numeric(df["year"], errors="coerce") == year)
-        ]
-        if rows.empty:
-            raise KeyError(f"Missing value for {measure_code} in {year}")
-        value = pd.to_numeric(rows.iloc[0]["value"], errors="coerce")
-    else:
-        year_column = str(year)
-        if year_column not in df.columns:
-            raise KeyError(f"Task 1 data is missing year column {year_column}")
-        rows = df[df[code_column] == measure_code]
-        if rows.empty:
-            raise KeyError(f"Missing measure {measure_code}")
-        value = pd.to_numeric(rows.iloc[0][year_column], errors="coerce")
+    # Match one measure code and one year, then coerce the stored value to numeric.
+    rows = df[
+        (df["measure_code"] == measure_code)
+        & (pd.to_numeric(df["year"], errors="coerce") == year)
+    ]
+    if rows.empty:
+        raise KeyError(f"Missing value for {measure_code} in {year}")
+
+    value = pd.to_numeric(rows.iloc[0]["value"], errors="coerce")
 
     if pd.isna(value):
         raise ValueError(f"Value for {measure_code} in {year} is empty")
@@ -44,6 +33,7 @@ def _value(df: pd.DataFrame, measure_code: str, year: int) -> float:
 
 
 def _share(df: pd.DataFrame, numerator_code: str, denominator_code: str, year: int) -> float:
+    # Convert two count measures into a percentage share for the selected year.
     return _value(df, numerator_code, year) / _value(df, denominator_code, year) * 100
 
 
@@ -58,6 +48,7 @@ def _ratio(numerator: float, denominator: float) -> float:
 
 
 def xfan0282_1(df: pd.DataFrame) -> StatisticResult:
+    # Compare apartment and separate-house shares to describe dwelling structure change.
     separate_2011 = _share(df, "DWELL_2", "DWELL_7", 2011)
     separate_2021 = _share(df, "DWELL_2", "DWELL_7", 2021)
     apartment_2011 = _share(df, "DWELL_4", "DWELL_7", 2011)
@@ -79,6 +70,7 @@ def xfan0282_1(df: pd.DataFrame) -> StatisticResult:
     )
 
 def xfan0282_2(df: pd.DataFrame) -> StatisticResult:
+    # Measure how much the work-from-home share grew between the two census years.
     wfh_2016 = _share(df, "WORK_TRAV_14", "WORK_TRAV_17", 2016)
     wfh_2021 = _share(df, "WORK_TRAV_14", "WORK_TRAV_17", 2021)
     growth_ratio = _ratio(wfh_2021, wfh_2016)
@@ -95,6 +87,7 @@ def xfan0282_2(df: pd.DataFrame) -> StatisticResult:
     )
 
 def xfan0282_3(df: pd.DataFrame) -> StatisticResult:
+    # Check whether public transport commuting fell alongside the work-from-home rise.
     public_transport_2016 = _share(df, "WORK_TRAV_23", "WORK_TRAV_17", 2016)
     public_transport_2021 = _share(df, "WORK_TRAV_23", "WORK_TRAV_17", 2021)
     drop = public_transport_2016 - public_transport_2021
@@ -111,6 +104,7 @@ def xfan0282_3(df: pd.DataFrame) -> StatisticResult:
     )
 
 def xfan0282_4(df: pd.DataFrame) -> StatisticResult:
+    # Compare occupation-specific commute distances to show hidden variation.
     occupation_commute_codes = {
         "managers": "COMMUTE_10",
         "professionals": "COMMUTE_11",
@@ -139,6 +133,7 @@ def xfan0282_4(df: pd.DataFrame) -> StatisticResult:
     )
 
 def xfan0282_5(df: pd.DataFrame) -> StatisticResult:
+    # Compare renter and mortgage-holder stress to summarise housing pressure.
     rent_stress = _value(df, "STRESS_17", 2021)
     mortgage_stress = _value(df, "STRESS_15", 2021)
     stress_ratio = _ratio(rent_stress, mortgage_stress)
@@ -161,9 +156,3 @@ STATISTICS = [
     xfan0282_4,
     xfan0282_5,
 ]
-
-def get_xfan0282_statistics(df: pd.DataFrame) -> list[StatisticResult]:
-    return [
-        statistic(df)
-        for statistic in STATISTICS
-    ]

@@ -1,4 +1,4 @@
-"""ArcGIS REST 客户端, 集中处理请求、metadata 校验、分页和计数查询."""
+"""ArcGIS REST 客户端, 集中处理请求、metadata 校验和分页."""
 from __future__ import annotations
 
 import time
@@ -141,16 +141,3 @@ class ArcGISClient:
             if not payload.get("exceededTransferLimit") or len(features) < limit:
                 break
             offset += limit
-
-    def query_count(self, url: str, params: dict[str, Any]) -> int:
-        """返回符合条件的记录数, 用于抓取前估算任务量."""
-        payload = self.get_json(
-            url,
-            {
-                **params,
-                "f": "json",
-                "returnCountOnly": "true",
-                "returnGeometry": "false",
-            },
-        )
-        return int(payload.get("count", 0))
