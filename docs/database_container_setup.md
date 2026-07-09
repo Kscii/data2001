@@ -96,8 +96,8 @@ docker compose down
 
 ```bash
 uv sync
-uv run data2001 init-db
-uv run data2001 check-db
+uv run sra-explorer init-db
+uv run sra-explorer check-db
 ```
 
 `init-db` 会创建 schema、PostGIS extension、业务表和索引。`check-db` 用来确认数据库、PostGIS、表和 SRID 都可用。
@@ -114,32 +114,32 @@ podman logs data2001-postgis
 第一次运行建议先查看抓取计划：
 
 ```bash
-uv run data2001 plan-import
+uv run sra-explorer plan-import
 ```
 
 确认范围没问题后，再运行完整 workflow：
 
 ```bash
-uv run data2001 run-workflow
+uv run sra-explorer run-workflow
 ```
 
 如果只想重新计算 score，可以运行：
 
 ```bash
-uv run data2001 compute-score
+uv run sra-explorer compute-score
 ```
 
 如果需要清空业务表但保留 schema/table/index：
 
 ```bash
-uv run data2001 clear-db --yes
+uv run sra-explorer clear-db --yes
 ```
 
 如果需要删除 schema 后重新初始化：
 
 ```bash
-uv run data2001 reset-db --yes
-uv run data2001 init-db
+uv run sra-explorer reset-db --yes
+uv run sra-explorer init-db
 ```
 
 ## 6. 常见问题

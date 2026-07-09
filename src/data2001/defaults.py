@@ -261,7 +261,7 @@ DEFAULT_SETTINGS_DATA = {
         "host": "0.0.0.0",
         "port": 8050,
         "debug": False,
-        "title": "DATA2001 Dashboard",
+        "title": "Sydney Resource Access Explorer",
         "poi_limit": None,
         "default_top_n": 30,
         "table_max_rows": 500,

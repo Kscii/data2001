@@ -21,22 +21,25 @@ from data2001.pipeline import (
 
 
 def build_parser() -> argparse.ArgumentParser:
-    """Build the data2001 CLI parser from the explicit step catalog."""
-    common_parser = argparse.ArgumentParser(add_help=False)
-    common_parser.add_argument("--config", default="configs/local.yaml")
+    """Build the CLI parser from the explicit step catalog."""
+    top_level_parser = argparse.ArgumentParser(add_help=False)
+    top_level_parser.add_argument("--config", default="configs/local.yaml")
 
-    parser = argparse.ArgumentParser(prog="data2001", parents=[common_parser])
+    command_parser = argparse.ArgumentParser(add_help=False)
+    command_parser.add_argument("--config", default=argparse.SUPPRESS)
+
+    parser = argparse.ArgumentParser(prog="sra-explorer", parents=[top_level_parser])
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     for definition in STEP_DEFINITIONS:
-        step_parser = subparsers.add_parser(definition.command, parents=[common_parser])
+        step_parser = subparsers.add_parser(definition.command, parents=[command_parser])
         if definition.is_destructive:
             step_parser.add_argument("--yes", action="store_true")
 
-    workflow_parser = subparsers.add_parser("run-workflow", parents=[common_parser])
+    workflow_parser = subparsers.add_parser("run-workflow", parents=[command_parser])
     workflow_parser.add_argument("--yes", action="store_true")
 
-    subparsers.add_parser("dashboard", parents=[common_parser])
+    subparsers.add_parser("dashboard", parents=[command_parser])
     return parser
 
 

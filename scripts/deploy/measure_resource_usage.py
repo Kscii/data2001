@@ -258,7 +258,7 @@ def _write_summary(path: Path, payload: dict[str, Any]) -> None:
 def _pipeline_command(config: str, extra_args: list[str]) -> list[str]:
     if extra_args:
         return extra_args
-    return ["uv", "run", "data2001", "--config", config, "run-workflow"]
+    return ["uv", "run", "sra-explorer", "--config", config, "run-workflow"]
 
 
 def measure_pipeline(args: argparse.Namespace) -> int:
@@ -451,11 +451,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     subparsers = parser.add_subparsers(dest="mode", required=True)
 
-    pipeline = subparsers.add_parser("pipeline", help="Measure data2001 run-workflow.")
+    pipeline = subparsers.add_parser("pipeline", help="Measure sra-explorer run-workflow.")
     pipeline.add_argument(
         "command",
         nargs=argparse.REMAINDER,
-        help="Optional custom command after --, for example -- uv run data2001 check-db.",
+        help="Optional custom command after --, for example -- uv run sra-explorer check-db.",
     )
     pipeline.set_defaults(func=measure_pipeline)
 
