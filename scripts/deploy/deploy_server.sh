@@ -194,14 +194,14 @@ podman run --rm \
   --env-file "${APP_ENV_FILE}" \
   --volume "${APP_CONFIG_FILE}:/app/configs/local.yaml:ro,z" \
   "${IMAGE_REF}" \
-  data2001 reset-db --yes
+  sra-explorer reset-db --yes
 
 podman run --rm \
   --network data2001 \
   --env-file "${APP_ENV_FILE}" \
   --volume "${APP_CONFIG_FILE}:/app/configs/local.yaml:ro,z" \
   "${IMAGE_REF}" \
-  data2001 run-workflow
+  sra-explorer run-workflow
 
 systemctl --user restart data2001-dashboard.service
 

@@ -1,7 +1,7 @@
 [project]
-name = "data2001-group-assignment"
+name = "sydney-resource-access-explorer"
 version = "0.1.0"
-description = "Add your description here"
+description = "PostGIS-backed geospatial ETL, scoring, analytics, and dashboard pipeline for urban resource access in Greater Sydney."
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
 dependencies = [
@@ -22,7 +22,7 @@ dependencies = [
 ]
 
 [project.scripts]
-data2001 = "data2001.cli:main"
+sra-explorer = "data2001.cli:main"
 
 [build-system]
 requires = ["setuptools>=69"]
